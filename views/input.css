@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+
+
+/* GLOBAL animations */
+a, button {
+  @apply cursor-pointer;
+}
+
+
+/* Micro interaction: smooth hover + click pop */
+.ui-action {
+  @apply transition-all duration-200 ease-out active:scale-95 hover:scale-[1.03];
+}
+
+
+/* for nav bar */
+/* underline */
+.navlink {
+  @apply relative font-semibold text-sm md:text-base text-[#E5E3F3];
+}
+
+.navlink::after {
+  content: "";
+  @apply absolute left-1/2 bottom-[-6px] h-[3px] w-full bg-gradient-to-r from-[#8C5FF6] to-[#F43F63] rounded-full opacity-0;
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform 320ms ease, opacity 320ms ease;
+}
+
+.navlink:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(1);
+}
+
+
+
+/* for card components */ 
+/* Card hover pop (NO vertical movement) */
+.home-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 22px #8C5FF630;
+  border-color: #8C5FF6;
+}
+
+/* Image smooth zoom (no dark overlay) */
+.home-img:hover {
+  transform: scale(1.08);
+}
+
+/* Wishlist neon when active */
+.wishlist-icon { color: #8A8695; }
+.wishlist-icon.active {
+  color: #C084FC;
+  filter: drop-shadow(0 0 6px #C084FC);
+  animation: pulse 0.35s ease;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+
+
+/* for 404 page */
+/* Improved Starfield — bigger + brighter + glowing */
+.star-layer {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  background-size: 350px 350px;
+  opacity: 0.28;
+  animation: drift linear infinite, twinkle 6s ease-in-out infinite;
+}
+
+.layer1 {
+  background-image: radial-gradient(#ffffff 1.7px, transparent 1.7px);
+  animation-duration: 70s;
+}
+.layer2 {
+  background-image: radial-gradient(#A879FF 1.9px, transparent 1.9px);
+  animation-duration: 110s;
+  filter: drop-shadow(0 0 4px #A879FFaa);
+}
+.layer3 {
+  background-image: radial-gradient(#F44773 2.1px, transparent 2.1px);
+  animation-duration: 150s;
+  filter: drop-shadow(0 0 5px #F44773aa);
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-1100px); }
+}
+
+@keyframes twinkle {
+  0%,100% { opacity: 0.22; }
+  50% { opacity: 0.45; }
+}
+
+
+/* date picker */
+.dp-input {
+  @apply bg-[#0E0D13] text-[#E5E3F3] px-4 py-3 rounded-xl border border-[#2D2A37] 
+  cursor-pointer focus:border-[#8C5FF6] placeholder:text-[#6E6782] outline-none transition-all;
+}
+
+
+
+/* fav button */
+.fav-btn {
+  @apply relative overflow-hidden px-4 py-2 flex items-center gap-2
+  border border-[#8C5FF6] text-[#F43F63] rounded-xl font-medium
+  transition-all duration-300;
+}
+
+/* Gradient overlay layer */
+.fav-btn::before {
+  content: "";
+  @apply absolute inset-0 bg-gradient-to-r from-[#8C5FF6] to-[#F43F63];
+  transform: translateX(-100%); /* hidden on left initially */
+  transition: transform 450ms ease;
+  z-index: -1;
+}
+
+.fav-btn:hover::before {
+  transform: translateX(0); /* slide in fully */
+}
+
+.fav-btn:hover {
+  @apply text-white scale-[1.05];
+  border-color: transparent;
+}
+
+
+/* host contact btn */
+.host-btn {
+  @apply relative overflow-hidden px-4 py-2 flex items-center gap-2
+  border border-[#8C5FF6] text-white rounded-xl font-medium
+  transition-all duration-300;
+}
+
+.host-btn::before {
+  content: "";
+  @apply absolute inset-0 bg-gradient-to-r from-[#8C5FF6] to-[#F43F63];
+  transform: translateX(-100%); /* hidden on left initially */
+  transition: transform 450ms ease;
+  z-index: -1;
+}
+
+.host-btn:hover::before {
+  transform: translateX(0); /* slide in fully */
+}
+
+.host-btn:hover {
+  @apply text-white scale-[1.05];
+  border-color: transparent;
+}

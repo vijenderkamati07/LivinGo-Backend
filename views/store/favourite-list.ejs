@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>airbnb | Favourite Homes</title>
+  <link rel="stylesheet" href="output.css" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- NAVBAR -->
+  <%- include('../partials/nav') %>
+
+    <main class="flex flex-col items-center flex-1 text-center px-6 py-10 bg-gray-50">
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Your Favourite Homes ❤</h2>
+      <p class="text-lg text-gray-600 max-w-2xl mb-10">
+        Here are the homes you’ve marked as favourites. Explore them anytime and book when you’re ready.
+      </p>
+
+      <div class="space-y-8 w-full max-w-5xl">
+
+        <% favHomesDetails.forEach(home=> { %>
+
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition duration-300 
+                flex flex-col md:flex-row overflow-hidden">
+
+            <!-- FIXED HEIGHT IMAGE -->
+            
+            <div class="md:w-1/2 aspect-[16/9] overflow-hidden relative rounded-l-2xl">
+              <a href="/home/<%= home._id %>">
+              <img src="<%= home.photo %>" class="w-full h-full object-cover object-center">
+              </a>
+            </div>
+            
+            <!-- RIGHT PANEL -->
+            <div class="p-6 text-left flex flex-col justify-between md:w-1/2">
+
+              <!-- Title -->
+              <a class="text-2xl font-semibold text-gray-800" href="/home/<%= home._id %>">
+                <%= home.houseName %>
+              </a>
+
+              <!-- LOCATION -->
+              <p class="text-gray-600 text-sm flex items-center mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" class="w-5 h-5 text-red-500 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 20.25c4.97 0 9-3.5 9-7.75S16.97 4.75 12 4.75 3 8.25 3 12.5s4.03 7.75 9 7.75z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.25v3l1.5 1.5" />
+                </svg>
+                <%= home.location %>
+              </p>
+
+              <!-- DESCRIPTION (LIMITED LINES) -->
+              <p class="text-gray-500 text-sm mt-3 leading-relaxed line-clamp-3">
+                <%= home.description %>
+              </p>
+
+              <!-- RATINGS + PRICE + REMOVE -->
+              <div class="mt-6">
+
+                <div class="flex items-center justify-between">
+
+                  <!-- Rating -->
+                  <div class="flex items-center text-yellow-400 space-x-1">
+                    <% for(let i=1; i<=4; i++) { %>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+                        <path
+                          d="M12 .587l3.668 7.568L24 9.748l-6 5.848 1.417 8.268L12 18.896l-7.417 4.968L6 15.596 0 9.748l8.332-1.593z" />
+                      </svg>
+                      <% } %>
+
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          class="w-5 h-5 text-yellow-300">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 .587l3.668 7.568L24 9.748l-6 5.848 1.417 8.268L12 18.896l-7.417 4.968L6 15.596 0 9.748l8.332-1.593z" />
+                        </svg>
+
+                        <span class="text-gray-600 text-sm ml-2">(4.7)</span>
+                  </div>
+
+                  <!-- PRICE -->
+                  <span class="text-2xl font-semibold text-gray-800">₹<%= home.price %> / night</span>
+                </div>
+
+                <!-- REMOVE BUTTON FIXED POSITION -->
+                <form action="/favourite/delete/<%= home._id %>" method="POST" class="mt-4">
+                  <button class="px-4 py-2 text-sm font-semibold text-red-500 border border-red-400 rounded-xl cursor-pointer 
+         transition-all duration-300 ease-out hover:bg-red-50 hover:scale-[1.04] active:scale-[0.98]">
+                    Remove from Favourites
+                  </button>
+
+                </form>
+
+              </div>
+
+            </div>
+          </div>
+
+          <% }) %>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <%- include('../partials/footer') %>
+
+</body>
+
+</html>

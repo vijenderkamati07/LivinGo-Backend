@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= editing ? "Edit" : "Add" %> Your Home
+  </title>
+  <!-- keep using your built CSS -->
+  <link rel="stylesheet" href="/output.css" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- NAVBAR -->
+  <%- include('../partials/nav') %>
+
+    <!-- Main (unchanged wrapper) -->
+    <main class="flex flex-col items-center justify-center flex-1 py-7 px-6">
+      <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-8 text-center">
+        Enter Your Home Details
+      </h2>
+
+      <!-- Card (unchanged styles) -->
+      <form action="/host/<%= editing ? "edit":"add-home" %>" method="POST"
+        class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md border border-gray-200">
+
+        <input type="hidden" name="id" value="<%=editing? home._id : '' %>">
+        <!-- Home Name -->
+        <div class="mb-6">
+          <label for="houseName" class="block text-gray-700 font-medium mb-2">Home Name</label>
+          <input type="text" value="<%=editing? home.houseName : '' %>" id="houseName" name="houseName"
+            placeholder="Enter your home name..."
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400"
+            required />
+        </div>
+
+        <!-- Price per Night -->
+        <div class="mb-6">
+          <label for="price" class="block text-gray-700 font-medium mb-2">Price per Night</label>
+          <input type="number" value="<%=editing? home.price : '' %>" id="price" name="price"
+            placeholder="Enter per night price..."
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400"
+            min="0" step="1" required />
+        </div>
+
+        <!-- Location (City) -->
+        <div class="mb-6">
+          <label for="location" class="block text-gray-700 font-medium mb-2">Location (City)</label>
+          <input type="text" value="<%=editing? home.location : '' %>" id="location" name="location"
+            placeholder="Enter your city name..."
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400"
+            required />
+        </div>
+
+        <!-- Photo URL -->
+        <div class="mb-6">
+          <label for="photo" class="block text-gray-700 font-medium mb-2">Photo URL</label>
+          <input type="url" value="<%=editing? home.photo : '' %>" id="photo" name="photo"
+            placeholder="Enter photo URL..."
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400" />
+        </div>
+
+        <!-- Category -->
+        <div class="mb-6">
+          <label for="category" class="block text-gray-700 font-medium mb-2">Category</label>
+          <select id="category" name="category"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 bg-white">
+
+            <option value="">Select property category</option>
+            <% ["Resort", "Apartment" , "Villas" , "Farmhouses" , "Hostels" , "Rooms" ].forEach(cat=> { %>
+              <option value="<%= cat %>" <%=editing && home.category===cat ? "selected" : "" %>>
+                <%= cat %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
+
+        <!-- Photo URL -->
+        <div class="mb-6">
+          <label for="description" class="block text-gray-700 font-medium mb-2">Description</label>
+          <input type="text" value="<%=editing? home.description : '' %>" id="description" name="description"
+            placeholder="Provide house description..."
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400" />
+        </div>
+
+        <!-- Submit (unchanged) -->
+        <button type="submit"
+          class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md cursor-pointer">
+          <%= editing ? "Update Details" : "Submit" %>
+        </button>
+      </form>
+    </main>
+
+    <!-- Footer (unchanged) -->
+    <footer class="bg-gray-100 text-gray-500 text-sm text-center py-4 border-t mt-auto">
+      © 2025 Airbnb Clone — Created for learning purpose.
+    </footer>
+
+</body>
+
+</html>

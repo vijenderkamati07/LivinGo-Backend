@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up | LivinGo</title>
+
+  <link rel="stylesheet" href="/output.css" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+
+  <style>
+    /* Soft animated glow on card */
+    .signup-shell {
+      box-shadow: 0 0 40px #000000aa, 0 0 60px #8C5FF620;
+      background: radial-gradient(circle at top left, #8C5FF610, transparent 55%),
+        radial-gradient(circle at bottom right, #F43F6330, transparent 55%),
+        #14131c;
+    }
+
+    /* Left illustration gradient overlay */
+    .signup-hero {
+      background: radial-gradient(circle at top, #8C5FF640, transparent 65%),
+        radial-gradient(circle at bottom, #F9737330, transparent 60%),
+        #151321;
+    }
+
+    /* Nice subtle border glow on hover */
+    .field-shell:focus-within {
+      box-shadow: 0 0 12px #8C5FF640;
+      border-color: #8C5FF6;
+    }
+
+    /* Password strength bar colors */
+    .strength-weak {
+      background: linear-gradient(90deg, #F97373, #FB923C);
+    }
+
+    .strength-medium {
+      background: linear-gradient(90deg, #EAB308, #34D399);
+    }
+
+    .strength-strong {
+      background: linear-gradient(90deg, #22C55E, #4ADE80);
+    }
+
+    /* Guest / Host card active state */
+    .role-card-active {
+      border-color: #8C5FF6;
+      background: radial-gradient(circle at top left, #8C5FF620, transparent 60%),
+        #1b1826;
+      box-shadow: 0 0 14px #8C5FF640;
+      transform: translateY(-2px) scale(1.02);
+    }
+  </style>
+</head>
+
+<body class="bg-[#0E0D13] text-[#E5E3F3] min-h-screen flex flex-col">
+
+  <!-- NAVBAR -->
+  <%- include('../partials/nav') %>
+
+    <main class="flex-1 flex items-center justify-center px-4 py-10">
+      <div
+        class="signup-shell w-full max-w-5xl rounded-3xl border border-[#2D2A37] overflow-hidden grid grid-cols-1 md:grid-cols-[1.1fr_1.2fr]">
+
+        <!-- LEFT SIDE – CITY / BUILDINGS ILLUSTRATION -->
+        <div class="signup-hero hidden md:flex flex-col justify-between p-8 border-r border-[#2D2A37]">
+          <div class="space-y-4">
+            <p class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#C9C5D4]">
+              <span class="h-[2px] w-8 bg-gradient-to-r from-[#8C5FF6] to-[#F43F63] rounded-full"></span>
+              Welcome to LivinGo
+            </p>
+            <h1 class="text-3xl font-extrabold leading-tight">
+              Host smarter. <span class="text-[#8C5FF6]">Stay better.</span>
+            </h1>
+            <p class="text-sm text-[#B9B7C6] max-w-sm">
+              Manage premium stays in vibrant cityscapes or peaceful getaways. One account lets you book as a guest
+              or host your own space.
+            </p>
+          </div>
+
+          <!-- Illustration -->
+          <div class="mt-6 flex-1 flex items-end justify-center">
+            <img src="https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&w=900&q=80"
+              alt="City buildings at night"
+              class="w-full max-w-xs rounded-2xl border border-[#2D2A37] object-cover shadow-lg shadow-[#000000aa]" />
+          </div>
+
+          <!-- Small trust badges -->
+          <div class="mt-6 flex items-center justify-between text-[11px] text-[#A39EB8]">
+            <span>🔒 Secure authentication</span>
+            <span>🌍 Guests & Hosts in one place</span>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE – SIGNUP FORM -->
+        <div class="bg-[#18171F]/90 px-6 py-8 md:px-8 md:py-10 flex flex-col">
+          <!-- Title -->
+          <div class="mb-6 text-center md:text-left">
+            <h2 class="text-2xl md:text-3xl font-bold tracking-tight">Create your account</h2>
+            <p class="text-xs md:text-sm text-[#A39EB8] mt-1">
+              Sign up to start booking stays or hosting with LivinGo.
+            </p>
+          </div>
+
+          <!-- OPTIONAL ERROR MESSAGE -->
+          <% if (typeof error !=="undefined" ) { %>
+            <p
+              class="mb-4 text-center text-red-400 text-sm font-medium bg-red-400/10 py-2 rounded-lg border border-red-500/30">
+              <%= error %>
+            </p>
+            <% } %>
+
+              <!-- FORM -->
+              <form action="/signup" method="POST" class="space-y-5">
+
+                <!-- Name -->
+                <div class="flex flex-col md:flex-row gap-4">
+                  <div class="field-shell w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-1 transition">
+                    <input type="text" name="firstName" placeholder="First name" required
+                      class="w-full bg-transparent py-2.5 text-sm text-[#E5E3F3] placeholder-[#807A93] outline-none">
+                  </div>
+                  <div class="field-shell w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-1 transition">
+                    <input type="text" name="lastName" placeholder="Last name" required
+                      class="w-full bg-transparent py-2.5 text-sm text-[#E5E3F3] placeholder-[#807A93] outline-none">
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div class="field-shell w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-1 transition">
+                  <input type="email" name="email" placeholder="Email address" required
+                    class="w-full bg-transparent py-2.5 text-sm text-[#E5E3F3] placeholder-[#807A93] outline-none">
+                </div>
+
+                <!-- Password + strength -->
+                <div class="space-y-2">
+                  <div
+                    class="field-shell w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-1 transition relative">
+                    <input id="password" type="password" name="password" placeholder="Password" required
+                      class="w-full bg-transparent py-2.5 pr-10 text-sm text-[#E5E3F3] placeholder-[#807A93] outline-none">
+                    <button type="button" id="togglePassword"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8C5FF6] hover:text-[#F43F63]">
+                      Show
+                    </button>
+                  </div>
+
+                  <!-- Strength bar -->
+                  <div class="h-1.5 w-full bg-[#1E1B2A] rounded-full overflow-hidden">
+                    <div id="passwordStrengthBar"
+                      class="h-full w-0 rounded-full strength-weak transition-all duration-300 ease-out"></div>
+                  </div>
+                  <p id="passwordStrengthText" class="text-[11px] text-[#A39EB8]"></p>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="space-y-1">
+                  <div
+                    class="field-shell w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-1 transition relative">
+                    <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm password"
+                      required
+                      class="w-full bg-transparent py-2.5 pr-10 text-sm text-[#E5E3F3] placeholder-[#807A93] outline-none">
+                    <button type="button" id="toggleConfirmPassword"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8C5FF6] hover:text-[#F43F63]">
+                      Show
+                    </button>
+                  </div>
+                  <p id="confirmPasswordText" class="text-[11px] text-[#F97373] hidden">Passwords do not match.</p>
+                </div>
+
+                <!-- USER TYPE – CARD STYLE (Guest / Host) -->
+                <div class="space-y-2">
+                  <p class="text-xs font-medium text-[#C9C5D4] uppercase tracking-wide">Register as</p>
+                  <input type="hidden" name="userType" id="userType" value="guest">
+
+                  <div class="grid grid-cols-2 gap-3">
+                    <!-- Guest -->
+                    <button type="button" id="roleGuest"
+                      class="role-card-active role-card flex flex-col items-center gap-2 border border-[#8C5FF6] rounded-2xl px-4 py-3 text-sm transition-all duration-300">
+                      <div
+                        class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8C5FF6] to-[#F97373] flex items-center justify-center text-xl">
+                        👤
+                      </div>
+                      <span class="font-semibold">Guest</span>
+                      <span class="text-[11px] text-[#A39EB8]">Book stays</span>
+                    </button>
+
+                    <!-- Host -->
+                    <button type="button" id="roleHost"
+                      class="role-card flex flex-col items-center gap-2 border border-transparent rounded-2xl px-4 py-3 text-sm bg-[#14131c] hover:border-[#8C5FF6]/60 transition-all duration-300">
+                      <div
+                        class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] flex items-center justify-center text-xl">
+                        🏠
+                      </div>
+                      <span class="font-semibold">Host</span>
+                      <span class="text-[11px] text-[#A39EB8]">List properties</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- TERMS -->
+                <label class="flex items-start gap-3 text-xs md:text-sm cursor-pointer">
+                  <input type="checkbox" required name="terms" class="mt-0.5 w-4 h-4 accent-[#8C5FF6] cursor-pointer">
+                  <span class="leading-relaxed text-[#C9C5D4]">
+                    I agree to the
+                    <a href="#" class="text-[#8C5FF6] hover:underline">Terms &amp; Conditions</a>
+                    and
+                    <a href="#" class="text-[#8C5FF6] hover:underline">Privacy Policy</a>.
+                  </span>
+                </label>
+
+                <!-- SUBMIT -->
+                <button type="submit" class="w-full py-3 rounded-xl text-white font-semibold text-sm md:text-base
+                   bg-gradient-to-r from-[#8C5FF6] to-[#F43F63]
+                   shadow-lg shadow-[#8C5FF630]
+                   hover:shadow-[#8C5FF660] hover:scale-[1.02] active:scale-[0.97]
+                   transition-all duration-300 cursor-pointer">
+                  Create account
+                </button>
+              </form>
+
+              <!-- Already have account -->
+              <p class="text-center text-[#A39EB8] text-xs md:text-sm mt-5">
+                Already have an account?
+                <a href="/login" class="text-[#8C5FF6] font-semibold hover:underline">Login instead</a>
+              </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <%- include('../partials/footer') %>
+      <script>
+        // Password strength logic
+        const passwordInput = document.getElementById("password");
+        const confirmInput = document.getElementById("confirmPassword");
+        const strengthBar = document.getElementById("passwordStrengthBar");
+        const strengthText = document.getElementById("passwordStrengthText");
+        const confirmText = document.getElementById("confirmPasswordText");
+
+        function evaluateStrength(value) {
+          let score = 0;
+          if (value.length >= 8) score++;
+          if (value.length >= 12) score++;
+          if (/[A-Z]/.test(value)) score++;
+          if (/[0-9]/.test(value)) score++;
+          if (/[^A-Za-z0-9]/.test(value)) score++;
+          return score;
+        }
+
+        passwordInput.addEventListener("input", () => {
+          const val = passwordInput.value || "";
+          const score = evaluateStrength(val);
+
+          let width = "0%";
+          let label = "";
+          let cls = "strength-weak";
+
+          if (!val) {
+            width = "0%";
+            label = "";
+          } else if (score <= 2) {
+            width = "35%";
+            label = "Weak – use at least 8 characters with numbers & symbols.";
+            cls = "strength-weak";
+          } else if (score === 3 || score === 4) {
+            width = "70%";
+            label = "Medium – add more length or variety for stronger security.";
+            cls = "strength-medium";
+          } else {
+            width = "100%";
+            label = "Strong password ✅";
+            cls = "strength-strong";
+          }
+
+          strengthBar.style.width = width;
+          strengthBar.classList.remove("strength-weak", "strength-medium", "strength-strong");
+          strengthBar.classList.add(cls);
+          strengthText.textContent = label;
+
+          checkConfirmMatch();
+        });
+
+        function checkConfirmMatch() {
+          if (!confirmInput.value) {
+            confirmText.classList.add("hidden");
+            return;
+          }
+          if (confirmInput.value !== passwordInput.value) {
+            confirmText.textContent = "Passwords do not match.";
+            confirmText.classList.remove("hidden");
+          } else {
+            confirmText.textContent = "Passwords match ✅";
+            confirmText.classList.remove("hidden");
+            confirmText.classList.remove("text-[#F97373]");
+            confirmText.classList.add("text-emerald-400");
+          }
+        }
+
+        confirmInput.addEventListener("input", checkConfirmMatch);
+
+        // Show / hide toggles
+        document.getElementById("togglePassword").addEventListener("click", () => {
+          const isPassword = passwordInput.type === "password";
+          passwordInput.type = isPassword ? "text" : "password";
+          document.getElementById("togglePassword").textContent = isPassword ? "Hide" : "Show";
+        });
+
+        document.getElementById("toggleConfirmPassword").addEventListener("click", () => {
+          const isPassword = confirmInput.type === "password";
+          confirmInput.type = isPassword ? "text" : "password";
+          document.getElementById("toggleConfirmPassword").textContent = isPassword ? "Hide" : "Show";
+        });
+
+        // Role selection logic (Guest / Host)
+        const roleGuest = document.getElementById("roleGuest");
+        const roleHost = document.getElementById("roleHost");
+        const userType = document.getElementById("userType");
+
+        function setRole(role) {
+          userType.value = role;
+          roleGuest.classList.remove("role-card-active");
+          roleHost.classList.remove("role-card-active");
+          if (role === "guest") roleGuest.classList.add("role-card-active");
+          else roleHost.classList.add("role-card-active");
+        }
+
+        roleGuest.addEventListener("click", () => setRole("guest"));
+        roleHost.addEventListener("click", () => setRole("host"));
+      </script>
+</body>
+</html>

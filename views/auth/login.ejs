@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | LivinGo</title>
+
+  <link rel="stylesheet" href="/output.css" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+
+  <style>
+    .hero-glow {
+      background: radial-gradient(circle at 20% 30%, #8C5FF610 0%, transparent 55%),
+        radial-gradient(circle at 80% 75%, #F43F6320 0%, transparent 65%),
+        #0E0D13;
+    }
+
+    .login-card {
+      background: #18171Fcc;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 35px #000000aa, 0 0 50px #8C5FF620;
+      animation: cardFade 0.6s ease-out;
+    }
+
+    @keyframes cardFade {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .illustration {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-14px);
+      }
+    }
+  </style>
+</head>
+
+<body class="hero-glow text-[#E5E3F3] min-h-screen flex flex-col">
+
+  <!-- NAVBAR -->
+  <%- include('../partials/nav') %>
+
+  <!-- MAIN -->
+  <main class="flex flex-col flex-1 items-center justify-center px-6 py-16">
+
+    <div class="max-w-6xl w-full flex flex-col md:flex-row items-center gap-14">
+
+      <!-- LEFT ILLUSTRATION / TEXT -->
+      <div class="flex-1 hidden md:flex flex-col items-center text-center px-6">
+        <img draggable="false" loading="lazy"
+          src="https://cdni.iconscout.com/illustration/premium/webp/people-travelling-with-luggage-5560442-4651593.webp"
+          class="w-72 md:w-80 illustration drop-shadow-[0_0_45px_#8C5FF660]" alt="Travel Illustration" />
+
+        <h2 class="mt-8 text-4xl font-bold tracking-tight leading-snug">
+          Welcome back to <span class="text-[#8C5FF6]">comfort</span>
+        </h2>
+
+        <p class="text-[#A39EB8] text-sm max-w-sm mt-3 leading-relaxed">
+          Log in to access your bookings, trips and wishlist —
+          your next stay is just a click away.
+        </p>
+      </div>
+
+      <!-- LOGIN CARD -->
+      <div class="flex-1 login-card rounded-3xl border border-[#2D2A37] p-8 md:p-10">
+
+        <h1 class="text-3xl font-bold text-center mb-2">Welcome Back</h1>
+        <p class="text-center text-[#B9B7C6] mb-8 text-sm">Log in to continue your LivinGo journey</p>
+
+        <% if (typeof error !== "undefined") { %>
+          <p
+            class="mb-5 text-center text-red-400 text-sm font-medium bg-red-400/10 py-2 rounded-xl border border-red-500/30">
+            <%= error %>
+          </p>
+        <% } %>
+
+        <form action="/login" method="POST" class="space-y-6">
+
+          <!-- Email -->
+          <input type="email" name="email" placeholder="Email address" required
+            class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 text-sm placeholder-[#807A93]
+            focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF650] outline-none transition">
+
+          <!-- Password -->
+          <div class="relative">
+            <input id="password" type="password" name="password" placeholder="Password" required
+              class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 pr-12 text-sm placeholder-[#807A93]
+              focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF650] outline-none transition">
+            <button type="button" id="togglePass"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#8C5FF6] hover:text-[#F43F63] transition">
+              Show
+            </button>
+          </div>
+
+          <!-- Forgot password -->
+          <div class="flex justify-end -mt-3">
+            <a href="#" class="text-[11px] text-[#8C5FF6] hover:text-[#F43F63] hover:underline transition">
+              Forgot password?
+            </a>
+          </div>
+
+          <!-- Login Button -->
+          <button type="submit"
+            class="w-full py-3 rounded-xl text-white font-semibold text-lg
+            bg-gradient-to-r from-[#8C5FF6] to-[#F43F63]
+            shadow-lg shadow-[#8C5FF630]
+            hover:shadow-[#8C5FF660] hover:scale-[1.04] active:scale-[0.97]
+            transition-all duration-300 cursor-pointer">
+            Log In
+          </button>
+        </form>
+
+        <p class="text-center text-[#A39EB8] text-sm mt-6">
+          Don’t have an account?
+          <a href="/signup" class="text-[#8C5FF6] hover:underline font-semibold">Create one</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <%- include('../partials/footer') %>
+
+  <script>
+    // Toggle password visibility
+    const password = document.getElementById("password");
+    const togglePass = document.getElementById("togglePass");
+    togglePass.addEventListener("click", () => {
+      const isHidden = password.type === "password";
+      password.type = isHidden ? "text" : "password";
+      togglePass.textContent = isHidden ? "Hide" : "Show";
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivinGo | Host Homes</title>
+
+  <link rel="stylesheet" href="/output.css" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+</head>
+
+<body class="bg-[#0E0D13] text-[#E5E3F3] min-h-screen flex flex-col">
+  <!-- NAVBAR -->
+  <%- include('../partials/nav') %>
+
+  <main class="flex-1">
+    <!-- HEADER + CTA -->
+    <section class="max-w-6xl mx-auto px-6 pt-10 pb-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="text-left">
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+            Your LivinGo homes
+          </h1>
+          <p class="mt-2 text-sm md:text-base text-[#C9C5D4]">
+            Manage your listings, track performance, and keep your best stays live.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 justify-start md:justify-end">
+          <!-- Bulk Delete (form submit) -->
+          <form id="bulkDeleteForm" action="/host/bulk-delete" method="POST"
+            class="hidden md:flex items-center gap-2">
+            <button
+              type="submit"
+              class="px-4 py-2 rounded-xl border border-[#F97373]/70 text-[#FCA5A5] text-sm font-medium
+                     hover:bg-[#3B1B23] hover:border-[#F97373] hover:text-white
+                     transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+              id="bulkDeleteBtn"
+              disabled>
+              Delete selected
+            </button>
+          </form>
+
+          <!-- Add Home -->
+          <a href="/host/add-home"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
+                   bg-gradient-to-r from-[#8C5FF6] to-[#F43F63]
+                   text-sm md:text-base font-semibold text-white
+                   shadow-lg shadow-[#8C5FF630]
+                   hover:shadow-[#8C5FF660] hover:scale-[1.03] active:scale-[0.97]
+                   transition-all duration-300 cursor-pointer">
+            <span class="text-lg">＋</span>
+            <span>Add new home</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SORT / FILTER BAR (UI ONLY, NO LOGIC YET) -->
+    <section class="max-w-6xl mx-auto px-6 pb-6">
+      <div
+        class="w-full bg-[#18171F] border border-[#2D2A37] rounded-2xl px-4 py-3
+               flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs md:text-sm text-[#9D99B0]">
+          <span class="inline-block w-2 h-2 rounded-full bg-[#22C55E]"></span>
+          <span>
+            You have
+            <span class="font-semibold text-[#E5E3F3]"><%= houses.length %></span>
+            active listing(s)
+          </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 justify-start md:justify-end text-xs md:text-sm">
+          <!-- Sort dropdown (UI only) -->
+          <div
+            class="flex items-center gap-2 bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-3 py-2 cursor-pointer">
+            <span class="text-[#9D99B0]">Sort by</span>
+            <select
+              class="bg-transparent text-[#E5E3F3] text-xs md:text-sm outline-none cursor-pointer">
+              <option class="bg-[#0E0D13]">Latest added</option>
+              <option class="bg-[#0E0D13]">Price: Low to High</option>
+              <option class="bg-[#0E0D13]">Price: High to Low</option>
+              <option class="bg-[#0E0D13]">Most booked</option>
+            </select>
+          </div>
+
+          <!-- Status filter (UI only) -->
+          <div
+            class="flex items-center gap-2 bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-3 py-2 cursor-pointer">
+            <span class="text-[#9D99B0]">Status</span>
+            <select
+              class="bg-transparent text-[#E5E3F3] text-xs md:text-sm outline-none cursor-pointer">
+              <option class="bg-[#0E0D13]">All</option>
+              <option class="bg-[#0E0D13]">Active</option>
+              <option class="bg-[#0E0D13]">Paused</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOST HOMES LIST -->
+    <section class="max-w-6xl mx-auto px-6 pb-14">
+      <% if (houses.length === 0) { %>
+        <div
+          class="mt-8 bg-[#18171F] border border-dashed border-[#2D2A37] rounded-2xl px-6 py-10 text-center text-[#C9C5D4]">
+          <p class="text-lg font-semibold mb-2">You haven’t listed any homes yet.</p>
+          <p class="text-sm mb-5">Start hosting to unlock potential earnings and visibility on LivinGo.</p>
+          <a href="/host/add-home"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
+                   bg-gradient-to-r from-[#8C5FF6] to-[#F43F63]
+                   text-sm font-semibold text-white cursor-pointer
+                   hover:scale-[1.03] active:scale-[0.97] transition-all">
+            Start hosting
+          </a>
+        </div>
+      <% } %>
+
+      <!-- Wrap all cards in ONE form for bulk delete -->
+      <% if (houses.length > 0) { %>
+      
+        <% houses.forEach(house => { 
+             const views = house.views || 0;
+             const favourites = house.favouritesCount || 0;
+             const bookings = house.bookingsCount || 0;
+             const status = house.status || "Active"; // fallback
+             const estRevenue = (house.price || 0) * 15; // rough estimate
+        %>
+          <article
+            class="group bg-[#18171F] mb-7 border border-[#2D2A37] rounded-2xl overflow-hidden
+                   shadow-md hover:shadow-xl hover:shadow-[#8C5FF620]
+                   transition-all duration-300 flex flex-col md:flex-row cursor-pointer">
+
+            <!-- IMAGE -->
+            <div class="md:w-1/2 relative overflow-hidden">
+              <img src="<%= house.photo %>" alt="Home image"
+                class="w-full h-full object-cover md:h-full aspect-[16/10] group-hover:scale-[1.03] transition-transform duration-500" />
+
+              <!-- STATUS PILL -->
+              <div class="absolute top-3 left-3 flex items-center gap-2">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-semibold
+                         bg-[#0E0D13]/80 border border-[#22C55E80] text-[#BBF7D0]
+                         flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full
+                               <%= status === 'Active' ? 'bg-[#22C55E]' : 'bg-[#FACC15]' %>"></span>
+                  <%= status %>
+                </span>
+              </div>
+
+              <!-- BULK SELECT CHECKBOX -->
+              <label
+                class="absolute top-3 right-3 bg-[#0E0D13]/80 rounded-full w-9 h-9
+                       flex items-center justify-center border border-[#2D2A37] hover:border-[#8C5FF6]
+                       transition-all duration-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="homeIds"
+                  value="<%= house._id %>"
+                  class="bulk-checkbox accent-[#8C5FF6] w-4 h-4 cursor-pointer" />
+              </label>
+            </div>
+
+            <!-- DETAILS -->
+            <div class="md:w-1/2 p-5 flex flex-col justify-between text-left gap-4">
+
+              <!-- Top: name + price -->
+              <div class="space-y-2">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="text-xl md:text-2xl font-semibold text-white line-clamp-1">
+                    <%= house.houseName %>
+                  </h3>
+                  <div class="text-right shrink-0">
+                    <p class="text-lg md:text-xl font-bold text-[#9FE4C7]">
+                      ₹<%= house.price %>
+                      <span class="text-xs text-[#9D99B0] font-normal">/ night</span>
+                    </p>
+                    <p class="text-[11px] text-[#9D99B0]">
+                      Est. monthly: <span class="text-[#C4F1E0] font-semibold">₹<%= estRevenue %></span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Location -->
+                <p class="text-xs md:text-sm text-[#C9C5D4] flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-4 h-4 text-[#8C5FF6] shrink-0"
+                    viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+                  </svg>
+                  <span class="truncate"><%= house.location %></span>
+                </p>
+
+                <!-- Description -->
+                <p class="text-xs md:text-sm text-[#9D99B0] line-clamp-2">
+                  <%= house.description %>
+                </p>
+              </div>
+
+              <!-- Middle: stats -->
+              <div
+                class="flex flex-wrap items-center gap-4 text-[11px] md:text-xs text-[#A29CB8] bg-[#111018] rounded-xl px-3 py-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>
+                  <span class="font-semibold text-[#E5E3F3]"><%= views %></span>
+                  <span>views</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-[#F97373]" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                  <span class="font-semibold text-[#E5E3F3]"><%= favourites %></span>
+                  <span>favourites</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-[#FACC15]" fill="none" stroke="currentColor" stroke-width="1.6"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M8 7V3m8 4V3M5 11h14M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+                  </svg>
+                  <span class="font-semibold text-[#E5E3F3]"><%= bookings %></span>
+                  <span>bookings</span>
+                </div>
+              </div>
+
+              <!-- Bottom: quick actions -->
+              <div class="flex items-center justify-between gap-3 pt-1">
+                <!-- Left: subtle note -->
+                <span class="text-[11px] text-[#75708C]">
+                  Last updated: <span class="font-medium">recently</span>
+                </span>
+
+                <!-- Right: quick actions -->
+                <div class="flex items-center gap-2 text-xs">
+                  <!-- View -->
+                  <a href="/home/<%= house._id %>"
+                    class="px-3 py-1.5 rounded-lg border border-transparent text-[#C9C5D4]
+                           hover:border-[#4B3A88] hover:bg-[#181329] cursor-pointer
+                           transition-all duration-200">
+                    View
+                  </a>
+
+                  <!-- Edit -->
+                  <a href="/host/edit/<%= house._id %>?editing=true"
+                    class="px-3 py-1.5 rounded-lg border border-[#3B82F6]/60 text-[#BFDBFE]
+                           hover:bg-[#1D2A44] hover:border-[#3B82F6] cursor-pointer
+                           transition-all duration-200">
+                    Edit
+                  </a>
+
+                  <!-- Duplicate (future feature) -->
+                  <a href="/host/duplicate/<%= house._id %>"
+                    class="hidden sm:inline-flex px-3 py-1.5 rounded-lg border border-[#8C5FF6]/60 text-[#D9C8FF]
+                           hover:bg-[#261D3F] hover:border-[#8C5FF6] cursor-pointer
+                           transition-all duration-200">
+                    Duplicate
+                  </a>
+
+                  <!-- Delete -->
+                  <form action="/host/delete/<%= house._id %>" method="POST" class="inline">
+                    <button
+                      type="submit"
+                      onclick="return confirm('Delete this home permanently?');"
+                      class="px-3 py-1.5 rounded-lg border border-[#F97373]/70 text-[#FCA5A5]
+                             hover:bg-[#3B1B23] hover:border-[#F97373] hover:text-white
+                             text-xs font-medium cursor-pointer transition-all duration-200">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+
+        <!-- Bulk delete submit for mobile (visible below list) -->
+        <div class="mt-6 flex md:hidden justify-end">
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl border border-[#F97373]/70 text-[#FCA5A5] text-sm font-medium
+                   hover:bg-[#3B1B23] hover:border-[#F97373] hover:text-white
+                   transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+            id="bulkDeleteBtnMobile"
+            disabled>
+            Delete selected
+          </button>
+        </div>
+      <% } %>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <%- include('../partials/footer') %>
+
+  <!-- Bulk select JS (very small, only for enabling/disabling buttons) -->
+  <script>
+    const checkboxes = document.querySelectorAll('.bulk-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const bulkDeleteBtnMobile = document.getElementById('bulkDeleteBtnMobile');
+
+    function updateBulkState() {
+      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+      if (bulkDeleteBtn) bulkDeleteBtn.disabled = !anyChecked;
+      if (bulkDeleteBtnMobile) bulkDeleteBtnMobile.disabled = !anyChecked;
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', updateBulkState);
+    });
+
+    updateBulkState();
+  </script>
+</body>
+
+</html>
