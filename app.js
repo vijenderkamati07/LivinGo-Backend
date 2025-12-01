@@ -54,7 +54,7 @@ app.use("/host", (req, res, next)=>{
 });
 app.use("/host",hostRouter);
 
-console.log("hi");
+console.log("hi this can be tracked by github");
 
 app.use(error)
 
