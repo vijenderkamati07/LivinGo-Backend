@@ -4,7 +4,6 @@ const path = require("path");
 //Local Module
 const mainDir = require("../utils/pathUtil");
 const Home = require("../Models/home");
-const Favourite = require("../Models/favorate");
 
 exports.getAddHome = (req, res, next) => {
   res.render("host/edit-home", {

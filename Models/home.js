@@ -1,6 +1,7 @@
+//External Modules
 const mongoose = require('mongoose');
 
-const Favourite = require('./favorate');
+//Local Modules
 const getCoordinates = require('./coordinates');
 
 const homeSchema = mongoose.Schema({
@@ -20,7 +21,7 @@ const homeSchema = mongoose.Schema({
   description:String,
   lat: Number,
   lng: Number,
-  category: String
+  category: String,
 });
 
 homeSchema.pre('save', async function () {
@@ -34,10 +35,5 @@ homeSchema.pre('save', async function () {
     this.lng = null;  
   }
 });
-
-homeSchema.pre('findOneAndDelete', async function(next){
-  const homeId = this.getQuery().id;
-  await Favourite.deleteMany({homeId:homeId});
-})
 
 module.exports = mongoose.model('Home',homeSchema);
