@@ -1,104 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    <%= editing ? "Edit" : "Add" %> Your Home
-  </title>
-  <!-- keep using your built CSS -->
+  <title><%= editing ? "Edit Home" : "Add New Home" %> | LivinGo</title>
   <link rel="stylesheet" href="/output.css" />
-  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+
+  <style>
+    .home-card {
+      background: rgba(24, 23, 31, 0.9);
+      border: 1px solid #2D2A37;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 30px #00000070, 0 0 50px #8C5FF620;
+    }
+  </style>
 </head>
 
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-[#0E0D13] min-h-screen text-[#E5E3F3] flex flex-col">
 
   <!-- NAVBAR -->
   <%- include('../partials/nav') %>
 
-    <!-- Main (unchanged wrapper) -->
-    <main class="flex flex-col items-center justify-center flex-1 py-7 px-6">
-      <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-8 text-center">
-        Enter Your Home Details
-      </h2>
+  <!-- MAIN -->
+  <main class="flex flex-col items-center justify-center flex-1 px-6 py-16">
 
-      <!-- Card (unchanged styles) -->
-      <form action="/host/<%= editing ? "edit":"add-home" %>" method="POST"
-        class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md border border-gray-200">
+    <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-8 text-center">
+      <%= editing ? "Update Your Home Listing" : "Add Your Home to LivinGo" %>
+    </h1>
 
-        <input type="hidden" name="id" value="<%=editing? home._id : '' %>">
-        <!-- Home Name -->
-        <div class="mb-6">
-          <label for="houseName" class="block text-gray-700 font-medium mb-2">Home Name</label>
-          <input type="text" value="<%=editing? home.houseName : '' %>" id="houseName" name="houseName"
-            placeholder="Enter your home name..."
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400"
-            required />
-        </div>
+    <!-- ERROR MESSAGE BOX -->
+    <% if (errors && typeof errors === "string") { %>
+      <div class="mb-6 w-full max-w-xl bg-red-500/15 border border-red-500 text-red-400 text-sm px-4 py-3 rounded-xl text-center shadow-md">
+        <%= errors %>
+      </div>
+    <% } %>
 
-        <!-- Price per Night -->
-        <div class="mb-6">
-          <label for="price" class="block text-gray-700 font-medium mb-2">Price per Night</label>
-          <input type="number" value="<%=editing? home.price : '' %>" id="price" name="price"
-            placeholder="Enter per night price..."
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400"
-            min="0" step="1" required />
-        </div>
+    <!-- CARD -->
+    <form 
+      action="/host/<%= editing ? "edit" : "add-home" %>" 
+      method="POST" 
+      enctype="multipart/form-data"
+      class="home-card rounded-3xl p-8 md:p-10 w-full max-w-xl"
+    >
 
-        <!-- Location (City) -->
-        <div class="mb-6">
-          <label for="location" class="block text-gray-700 font-medium mb-2">Location (City)</label>
-          <input type="text" value="<%=editing? home.location : '' %>" id="location" name="location"
-            placeholder="Enter your city name..."
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400"
-            required />
-        </div>
+      <input type="hidden" name="id" value="<%= editing ? home._id : '' %>">
 
-        <!-- Photo URL -->
-        <div class="mb-6">
-          <label for="photo" class="block text-gray-700 font-medium mb-2">Photo URL</label>
-          <input type="url" value="<%=editing? home.photo : '' %>" id="photo" name="photo"
-            placeholder="Enter photo URL..."
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400" />
-        </div>
+      <!-- Home Name -->
+      <label class="block text-sm mb-2">Home Name</label>
+      <input 
+        type="text"
+        name="houseName"
+        value="<%= oldInput.houseName || (editing ? home.houseName : '') %>"
+        placeholder="Enter your home name..."
+        class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 mb-5 outline-none focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF660]"
+        required
+      />
 
-        <!-- Category -->
-        <div class="mb-6">
-          <label for="category" class="block text-gray-700 font-medium mb-2">Category</label>
-          <select id="category" name="category"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 bg-white">
+      <!-- Price per Night -->
+      <label class="block text-sm mb-2">Price per Night</label>
+      <input 
+        type="number"
+        name="price"
+        value="<%= oldInput.price || (editing ? home.price : '') %>"
+        placeholder="Enter per night price..."
+        class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 mb-5 outline-none focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF660]"
+        required
+      />
 
-            <option value="">Select property category</option>
-            <% ["Resort", "Apartment" , "Villas" , "Farmhouses" , "Hostels" , "Rooms" ].forEach(cat=> { %>
-              <option value="<%= cat %>" <%=editing && home.category===cat ? "selected" : "" %>>
-                <%= cat %>
-              </option>
-              <% }) %>
-          </select>
-        </div>
+      <!-- City -->
+      <label class="block text-sm mb-2">Location (City)</label>
+      <input 
+        type="text"
+        name="location"
+        value="<%= oldInput.location || (editing ? home.location : '') %>"
+        placeholder="Enter your city..."
+        class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 mb-5 outline-none focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF660]"
+        required
+      />
 
-        <!-- Photo URL -->
-        <div class="mb-6">
-          <label for="description" class="block text-gray-700 font-medium mb-2">Description</label>
-          <input type="text" value="<%=editing? home.description : '' %>" id="description" name="description"
-            placeholder="Provide house description..."
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:outline-none text-gray-700 placeholder-gray-400" />
-        </div>
+      <!-- Image -->
+      <label class="block text-sm mb-2">Upload Image</label>
+      <input 
+        type="file"
+        name="photo"
+        accept="image/*"
+        class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 mb-5 outline-none cursor-pointer focus:border-[#8C5FF6]"
+      />
 
-        <!-- Submit (unchanged) -->
-        <button type="submit"
-          class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md cursor-pointer">
-          <%= editing ? "Update Details" : "Submit" %>
-        </button>
-      </form>
-    </main>
+      <!-- Category -->
+      <label class="block text-sm mb-2">Category</label>
+      <select 
+        name="category"
+        class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 mb-5 outline-none focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF660]"
+      >
+        <option value="">Select category</option>
+        <% ["Resort", "Apartment", "Villas", "Farmhouses", "Hostels", "Rooms"].forEach(cat => { %>
+          <option value="<%= cat %>" <%= oldInput.category === cat || (editing && home.category === cat) ? "selected" : "" %>>
+            <%= cat %>
+          </option>
+        <% }) %>
+      </select>
 
-    <!-- Footer (unchanged) -->
-    <footer class="bg-gray-100 text-gray-500 text-sm text-center py-4 border-t mt-auto">
-      © 2025 Airbnb Clone — Created for learning purpose.
-    </footer>
+      <!-- Description -->
+      <label class="block text-sm mb-2">Description</label>
+      <textarea
+        name="description"
+        placeholder="Tell about your property..."
+        class="w-full h-28 bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 mb-8 resize-none outline-none focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF660]"
+      ><%= oldInput.description || (editing ? home.description : '') %></textarea>
+
+      <!-- Submit -->
+      <button 
+        type="submit"
+        class="w-full py-3 text-lg font-semibold text-white rounded-xl bg-gradient-to-r from-[#8C5FF6] to-[#F43F63] shadow-lg hover:shadow-[#8C5FF670] hover:scale-[1.03] active:scale-[0.97] transition-all"
+      >
+        <%= editing ? "Update Home" : "Add Home" %>
+      </button>
+    </form>
+  </main>
+
+  <!-- FOOTER -->
+  <%- include('../partials/footer') %>
 
 </body>
-
 </html>

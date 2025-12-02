@@ -70,10 +70,10 @@
   class="home-card bg-[#18171F] rounded-2xl shadow-lg overflow-hidden border border-[#2D2A37] transition-all duration-300 cursor-pointer">
 
   <a href="/home/<%= home._id %>">
-    <div class="relative h-52 overflow-hidden">
+      <div class="relative h-52 overflow-hidden">
       <!-- Image -->
       <img
-        src="<%= home.photo %>"
+        src="/uploads/<%= home.photo %>"
         class="w-full h-full object-cover transition-all duration-500 home-img" />
 
       <!-- Location Tag -->

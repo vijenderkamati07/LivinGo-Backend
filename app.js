@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const dotenev = require("dotenv").config();
 const mongoDbStore = require('connect-mongodb-session')(session);
+const multer = require('multer');
 
 
 //Local Modules
@@ -27,9 +28,45 @@ const store = new mongoDbStore({
   collection:'sessions'
 });
 
-app.use(express.static(path.join(mainDir, 'public')))
+const randomStr = (length)=>{
+  let result           = '';
+  const characters       = 'abcdefghijklmnopqrstuvwxyz';
+  const charactersLength = characters.length; 
+  for ( let i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+ }
+  return result;
+}
+
+const strorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(mainDir, 'uploads'));
+  },
+  filename: (req, file, cb) => {
+    cb(null, randomStr(5) + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb )=>{
+  if(file.mimetype ==='image/png' || file.mimetype ==='image/jpg' || file.mimetype ==='image/jpeg'){
+    cb(null, true);
+  }else{
+    cb(null, false);
+  }
+}
+
+const multerOptions = multer(
+  {
+    storage: strorage,
+    fileFilter: fileFilter
+  }
+)
 
 app.use(express.urlencoded());
+app.use(multer(multerOptions).single('photo'));
+app.use(express.static(path.join(mainDir, 'public')))
+app.use("/uploads",express.static(path.join(mainDir, 'uploads')))
+app.use("/host/uploads",express.static(path.join(mainDir, 'uploads')))
 
 app.use(session({
   secret:'my secret key',

@@ -1,5 +1,6 @@
 //Core Module
 const path = require("path");
+const fs = require('fs');
 
 //Local Module
 const mainDir = require("../utils/pathUtil");
@@ -10,6 +11,8 @@ exports.getAddHome = (req, res, next) => {
     editing: false,
     isLoggedIn: req.isLoggedIn,
     user: req.session.user,
+    errors: "",
+    oldInput: {},
   });
 };
 
@@ -28,12 +31,29 @@ exports.getEditHomes = (req, res, next) => {
       isLoggedIn: req.isLoggedIn,
       editing: editing,
       user: req.session.user,
+      errors: "",
+      oldInput: {},
     });
   });
 };
 
 exports.postAddHome = (req, res, next) => {
-  const { houseName, price, location, photo, description, category } = req.body;
+  const { houseName, price, location, description, category } = req.body;
+
+  console.log("User session data:", req.file);
+
+  if (!req.file) {
+    return res.status(422).render("host/edit-home", {
+      editing: false,
+      isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
+      errors:
+        "Attached file is not an image. Please upload a valid image file.",
+      oldInput: { houseName, price, location, description, category },
+    });
+  }
+
+  const photo = req.file.filename;
 
   const house = new Home({
     houseName,
@@ -62,16 +82,27 @@ exports.getHostHomes = (req, res, next) => {
 };
 
 exports.postEditHomes = (req, res, next) => {
-  const { id, houseName, price, location, photo, description, category } =
-    req.body;
+  const { id, houseName, price, location, description, category } = req.body;
   Home.findById(id)
     .then((home) => {
       home.houseName = houseName;
       home.price = price;
       home.location = location;
-      home.photo = photo;
       home.description = description;
       home.category = category;
+
+      if (req.file) {
+        if(home.photo){
+          const oldImagePath = path.join(mainDir, 'uploads', home.photo);
+          fs.unlink(oldImagePath, (err) => {
+            if (err) {
+              console.error('Error deleting old image:', err);  
+            } else {
+              console.log('Old image deleted successfully');
+            }
+          });
+        home.photo = req.file.filename;
+      }
 
       home
         .save()
@@ -81,7 +112,7 @@ exports.postEditHomes = (req, res, next) => {
         .catch((err) => {
           console.log("Error while updating", err);
         });
-    })
+    }})
     .catch((err) => {
       console.log("Home not found", err);
     });
