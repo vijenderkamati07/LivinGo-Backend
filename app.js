@@ -54,8 +54,6 @@ app.use("/host", (req, res, next)=>{
 });
 app.use("/host",hostRouter);
 
-console.log("hi this can be tracked by github");
-
 app.use(error)
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{

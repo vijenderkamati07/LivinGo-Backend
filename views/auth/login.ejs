@@ -20,13 +20,13 @@
       background: #18171Fcc;
       backdrop-filter: blur(8px);
       box-shadow: 0 0 35px #000000aa, 0 0 50px #8C5FF620;
-      animation: cardFade 0.6s ease-out;
+      animation: fadeIn 0.5s ease-out;
     }
 
-    @keyframes cardFade {
+    @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(18px);
       }
 
       to {
@@ -40,14 +40,16 @@
     }
 
     @keyframes float {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
+      0%,100% { transform: translateY(0); }
+      50%     { transform: translateY(-12px); }
+    }
 
-      50% {
-        transform: translateY(-14px);
-      }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%     { transform: translateX(-7px); }
+      40%     { transform: translateX(7px); }
+      60%     { transform: translateX(-5px); }
+      80%     { transform: translateX(5px); }
     }
   </style>
 </head>
@@ -73,8 +75,7 @@
         </h2>
 
         <p class="text-[#A39EB8] text-sm max-w-sm mt-3 leading-relaxed">
-          Log in to access your bookings, trips and wishlist —
-          your next stay is just a click away.
+          Log in to access your bookings, trips and wishlist — your next stay is just a click away.
         </p>
       </div>
 
@@ -84,17 +85,24 @@
         <h1 class="text-3xl font-bold text-center mb-2">Welcome Back</h1>
         <p class="text-center text-[#B9B7C6] mb-8 text-sm">Log in to continue your LivinGo journey</p>
 
-        <% if (typeof error !== "undefined") { %>
-          <p
-            class="mb-5 text-center text-red-400 text-sm font-medium bg-red-400/10 py-2 rounded-xl border border-red-500/30">
-            <%= error %>
-          </p>
+        <!-- ERROR BOX (supports array of errors) -->
+        <% if (errors && errors.length > 0) { %>
+          <div
+            class="mb-6 p-4 bg-red-400/10 border border-red-500/40 text-red-400 rounded-xl text-[13px] shadow-lg animate-[shake_0.35s]">
+            <ul class="list-disc list-inside space-y-1">
+              <% errors.forEach(msg => { %>
+                <li><%= msg %></li>
+              <% }) %>
+            </ul>
+          </div>
         <% } %>
 
         <form action="/login" method="POST" class="space-y-6">
 
           <!-- Email -->
-          <input type="email" name="email" placeholder="Email address" required
+          <input type="email" name="email"
+            value="<%= oldInput && oldInput.email ? oldInput.email : '' %>"
+            placeholder="Email address" required
             class="w-full bg-[#0E0D13] border border-[#2D2A37] rounded-xl px-4 py-3 text-sm placeholder-[#807A93]
             focus:border-[#8C5FF6] focus:shadow-[0_0_8px_#8C5FF650] outline-none transition">
 

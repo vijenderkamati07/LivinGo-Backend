@@ -13,11 +13,13 @@
   "description": "",
   "dependencies": {
     "@tailwindcss/cli": "^4.1.17",
+    "bcryptjs": "^3.0.3",
     "connect-mongodb-session": "^5.0.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "express-validator": "^7.3.1",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "mysql2": "^3.15.3",

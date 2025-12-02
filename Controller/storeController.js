@@ -10,6 +10,7 @@ exports.getIndex = (req, res, next) => {
     res.render("store/index", {
       homes: homes,
       isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
     });
   });
 };
@@ -19,13 +20,15 @@ exports.getHomes = (req, res, next) => {
     res.render("store/home-list", {
       homes: homes,
       isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
     });
   });
 };
 
 exports.getBookings = (req, res, next) => {
-  res.render("store/bookings",{
-    isLoggedIn:req.isLoggedIn
+  res.render("store/bookings", {
+    isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
   });
 };
 
@@ -69,10 +72,11 @@ exports.getFavorites = (req, res, next) => {
     .then((favourites) => {
       const favHomesDetails = favourites.map((fav) => fav.homeId);
       console.log(favHomesDetails);
-      res.render("store/favourite-list", { 
+      res.render("store/favourite-list", {
         favHomesDetails: favHomesDetails,
-        isLoggedIn:req.isLoggedIn
-       });
+        isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
+      });
     });
 };
 
@@ -83,10 +87,11 @@ exports.getHomeDetails = (req, res, next) => {
     if (!home) {
       res.redirect("/homes");
     } else {
-      res.render("store/home-detail", { 
+      res.render("store/home-detail", {
         home: home,
-        isLoggedIn:req.isLoggedIn
-       });
+        isLoggedIn: req.isLoggedIn,
+        user: req.session.user,
+      });
     }
   });
 };
