@@ -65,7 +65,8 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin:[ "http://localhost:5173",
+    "https://livingo-six.vercel.app"],
     credentials: true // allow cookies / sessions to be sent
   })
 );
@@ -77,11 +78,16 @@ app.use("/host/uploads",express.static(path.join(mainDir, 'uploads')))
 
 
 app.use(session({
-  secret:'my secret key',
-  resave:false,
-  saveUninitialized:true,
-  store:store
+  secret: 'my secret key',
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  cookie: {
+    sameSite: "none",
+    secure: true 
+  }
 }));
+
 
 
 app.use((req, res, next)=>{
