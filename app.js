@@ -77,16 +77,18 @@ app.use("/uploads",express.static(path.join(mainDir, 'uploads')))
 app.use("/host/uploads",express.static(path.join(mainDir, 'uploads')))
 
 
-app.use(session({
-  secret: 'my secret key',
-  resave: false,
-  saveUninitialized: false,
-  store: store,
-  cookie: {
-    sameSite: "none",
-    secure: true 
-  }
-}));
+app.use(
+  session({
+    secret: "...",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    },
+  })
+);
 
 
 
