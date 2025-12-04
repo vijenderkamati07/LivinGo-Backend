@@ -5,24 +5,23 @@ const mongoose = require('mongoose');
 const getCoordinates = require('./coordinates');
 
 const homeSchema = mongoose.Schema({
-  houseName:{
-    type: String,
-    required: true
-  },
-  price:{
-    type: Number,
-    required: true
-  },
-  location:{
-    type: String,
-    required: true
-  },
-  photo:String,
-  description:String,
+  houseName: { type: String, required: true },
+  price: { type: Number, required: true },
+  location: { type: String, required: true },
+  state: {type: String, required: true},
+  photo: String,
+  description: String,
   lat: Number,
   lng: Number,
   category: String,
-});
+
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+},{ timestamps: true });
+
 
 homeSchema.pre('save', async function () {
   const result = await getCoordinates(this.location);

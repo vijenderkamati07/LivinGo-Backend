@@ -8,6 +8,7 @@ const session = require('express-session');
 const dotenev = require("dotenv").config();
 const mongoDbStore = require('connect-mongodb-session')(session);
 const multer = require('multer');
+const cors = require('cors');
 
 
 //Local Modules
@@ -16,12 +17,9 @@ const {hostRouter} = require('./router/hostRouter');
 const mainDir = require('./utils/pathUtil');
 const {error} = require('./Controller/error');
 const authRouter = require('./router/authRouter');
-
+const apiRouter = require('./router/apiRouter');
 
 const app = express();
-
-app.set('view engine', 'ejs');
-app.set('views', 'views');
 
 const store = new mongoDbStore({
   uri:process.env.MONGO_URI,
@@ -63,10 +61,20 @@ const multerOptions = multer(
 )
 
 app.use(express.urlencoded());
+app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true // allow cookies / sessions to be sent
+  })
+);
+
 app.use(multer(multerOptions).single('photo'));
 app.use(express.static(path.join(mainDir, 'public')))
 app.use("/uploads",express.static(path.join(mainDir, 'uploads')))
 app.use("/host/uploads",express.static(path.join(mainDir, 'uploads')))
+
 
 app.use(session({
   secret:'my secret key',
@@ -75,6 +83,7 @@ app.use(session({
   store:store
 }));
 
+
 app.use((req, res, next)=>{
   req.isLoggedIn = req.session.isLoggedIn;
   next();
@@ -82,6 +91,7 @@ app.use((req, res, next)=>{
 
 app.use(authRouter);
 app.use(storeRouter);
+app.use("/api", apiRouter);
 app.use("/host", (req, res, next)=>{
   if(req.isLoggedIn){
     next();

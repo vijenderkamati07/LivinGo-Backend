@@ -11,7 +11,7 @@ exports.getLogin = (req, res, next) => {
     isLoggedIn: false,
     errors: [],
     oldInput: {},
-    user: {}
+    user: {},
   });
 };
 
@@ -20,25 +20,20 @@ exports.postLogin = async (req, res, next) => {
   const user = await User.findOne({ email: email });
 
   if (!user) {
-    return res.status(422).render("auth/login", {
-      isLoggedIn: false,
+    return res.status(422).json({
       errors: ["Invailed user name or password"],
       oldInput: { email },
-    user: {}
     });
   }
 
   try {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(422).render("auth/login", {
-        isLoggedIn: false,
+      return res.status(422).json({
         errors: ["Invailed user name or password"],
         oldInput: { email },
-        user: {}
       });
     }
-
 
     req.session.isLoggedIn = true;
     req.session.user = {
@@ -50,24 +45,39 @@ exports.postLogin = async (req, res, next) => {
 
     req.session.save((err) => {
       if (err) {
-        console.error('Session save failed:', err);
+        console.error("Session save failed:", err);
         return next(err);
       }
-      console.log('Session saved successfully for:', req.session.user.email);
-      return res.redirect('/');
+      console.log("Session saved successfully for:", req.session.user.email);
+      return res.json({
+        success: true,
+        message: "Login successful",
+        isLoggedIn: true,
+        user: req.session.user,
+      });
     });
   } catch (err) {
-    console.error('Error in login flow:', err);
+    console.error("Error in login flow:", err);
     return next(err);
   }
 };
 
 exports.postLogout = (req, res, next) => {
   req.session.destroy((err) => {
-    console.log(err);
-    res.redirect("/login");
+    if (err) {
+      console.error("Logout failed:", err);
+      return res.status(500).json({ success: false, message: "Logout failed" });
+    }
+
+    // Clear cookie on client
+    res.clearCookie("connect.sid");
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
   });
 };
+
 
 exports.getSignup = (req, res) => {
   res.render("auth/signup", {
@@ -80,7 +90,7 @@ exports.getSignup = (req, res) => {
       password: "",
       userType: "guest",
     },
-    user: {}
+    user: {},
   });
 };
 
@@ -144,18 +154,9 @@ exports.postSignup = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(422).render("auth/signup", {
-        isLoggedIn: false,
-        errors: errors.array().map((err) => err.msg),
-        oldInput: {
-          firstName,
-          lastName,
-          email,
-          password,
-          userType,
-        },
-        user: {}
-      });
+      return res
+        .status(422)
+        .json({ errors: errors.array().map((err) => err.msg) });
     }
 
     bcrypt
@@ -172,22 +173,22 @@ exports.postSignup = [
       })
       .then(() => {
         console.log("User registered successfully");
-        res.redirect("/login");
+        res.status(201).json({ message: "User registered successfully" });
       })
       .catch((err) => {
         console.log("Error registering user:", err);
-        return res.status(500).render("auth/signup", {
-          isLoggedIn: false,
-          errors: ["An error occurred while registering. Please try again."],
-          oldInput: {
-            firstName,
-            lastName,
-            email,
-            password,
-            userType,
-          },
-          user: {}
-        });
+        return res.status(500).json({ errors: ["Internal server error"] });
       });
   },
 ];
+
+
+exports.getMe = (req, res) => {
+  if (req.session?.isLoggedIn) {
+    return res.json({
+      isLoggedIn: true,
+      user: req.session.user,
+    });
+  }
+  res.json({ isLoggedIn: false });
+}
