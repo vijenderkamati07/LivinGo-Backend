@@ -18,23 +18,6 @@ exports.getIndex = async (req, res, next) => {
   }
 };
 
-exports.getHomes = (req, res) => {
-  Home.find().then((homes) => {
-    res.render("store/home-list", {
-      homes: homes,
-      isLoggedIn: req.isLoggedIn,
-      user: req.session.user,
-    });
-  });
-};
-
-exports.getBookings = (req, res) => {
-  res.render("store/bookings", {
-    isLoggedIn: req.isLoggedIn,
-    user: req.session.user,
-  });
-};
-
 // ✅ ADD TO FAVOURITES (API)
 exports.postAddToFavorites = async (req, res) => {
   // guard: must be logged in

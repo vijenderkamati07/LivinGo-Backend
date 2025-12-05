@@ -6,15 +6,6 @@ const fs = require("fs");
 const mainDir = require("../utils/pathUtil");
 const Home = require("../Models/home");
 
-exports.getAddHome = (req, res, next) => {
-  res.render("host/edit-home", {
-    editing: false,
-    isLoggedIn: req.isLoggedIn,
-    user: req.session.user,
-    errors: "",
-    oldInput: {},
-  });
-};
 
 exports.getEditHomes = async (req, res, next) => {
   const homeId = req.params.homeId;

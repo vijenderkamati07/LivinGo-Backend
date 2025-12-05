@@ -6,15 +6,6 @@ const bcrypt = require("bcryptjs");
 //Local modules
 const User = require("../Models/user");
 
-exports.getLogin = (req, res) => {
-  res.render("auth/login", {
-    isLoggedIn: false,
-    errors: [],
-    oldInput: {},
-    user: {},
-  });
-};
-
 exports.postLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -78,21 +69,6 @@ exports.postLogout = (req, res) => {
       success: true,
       message: "Logged out successfully",
     });
-  });
-};
-
-exports.getSignup = (req, res) => {
-  res.render("auth/signup", {
-    isLoggedIn: false,
-    errors: [],
-    oldInput: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      userType: "guest",
-    },
-    user: {},
   });
 };
 
