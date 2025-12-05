@@ -11,11 +11,8 @@ const multer = require("multer");
 const cors = require("cors");
 
 //Local Modules
-const storeRouter = require("./router/storeRouter");
-const { hostRouter } = require("./router/hostRouter");
 const mainDir = require("./utils/pathUtil");
 const { error } = require("./Controller/error");
-const authRouter = require("./router/authRouter");
 const apiRouter = require("./router/apiRouter");
 
 const app = express();
@@ -105,8 +102,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(authRouter);
-app.use(storeRouter);
 app.use("/api", apiRouter);
 
 app.use("/host", (req, res, next) => {
@@ -116,7 +111,6 @@ app.use("/host", (req, res, next) => {
     res.redirect("/login");
   }
 });
-app.use("/host", hostRouter);
 
 app.use(error);
 
