@@ -36,14 +36,19 @@ exports.postLogin = async (req, res, next) => {
     }
 
     req.session.isLoggedIn = true;
-    req.session.user = user;  // <-- store whole object
-
+    req.session.user = {
+      _id: user._id.toString(),
+      firstName: user.firstName,
+      email: user.email,
+      userType: user.userType,
+    };
 
     req.session.save((err) => {
       if (err) {
         console.error("Session save failed:", err);
         return next(err);
       }
+
       console.log("Session saved successfully for:", req.session.user.email);
       return res.json({
         success: true,
@@ -73,7 +78,6 @@ exports.postLogout = (req, res, next) => {
     });
   });
 };
-
 
 exports.getSignup = (req, res) => {
   res.render("auth/signup", {
@@ -178,7 +182,6 @@ exports.postSignup = [
   },
 ];
 
-
 exports.getMe = (req, res) => {
   if (req.session?.isLoggedIn) {
     return res.json({
@@ -187,4 +190,4 @@ exports.getMe = (req, res) => {
     });
   }
   res.json({ isLoggedIn: false });
-}
+};
