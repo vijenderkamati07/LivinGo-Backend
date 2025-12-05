@@ -21,6 +21,9 @@ const apiRouter = require('./router/apiRouter');
 
 const app = express();
 
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+
 const store = new mongoDbStore({
   uri:process.env.MONGO_URI,
   collection:'sessions'
@@ -91,7 +94,6 @@ app.use(
     },
   })
 );
-
 
 
 app.use((req, res, next)=>{
