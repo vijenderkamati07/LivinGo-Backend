@@ -82,10 +82,12 @@ app.use(
     secret: "...",
     resave: false,
     saveUninitialized: false,
+    store: store, // <-- MISSING EARLIER (critical)
     cookie: {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: "none", // required for cross-domain cookie
+      maxAge: 1000 * 60 * 60 * 24 * 7, // (optional) 7 days login persistence
     },
   })
 );
