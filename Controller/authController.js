@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 //Local modules
 const User = require("../Models/user");
 
-exports.getLogin = (req, res, next) => {
+exports.getLogin = (req, res) => {
   res.render("auth/login", {
     isLoggedIn: false,
     errors: [],
@@ -17,16 +17,17 @@ exports.getLogin = (req, res, next) => {
 
 exports.postLogin = async (req, res, next) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email: email });
-
-  if (!user) {
-    return res.status(422).json({
-      errors: ["Invailed user name or password"],
-      oldInput: { email },
-    });
-  }
 
   try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(422).json({
+        errors: ["Invailed user name or password"],
+        oldInput: { email },
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(422).json({
@@ -35,6 +36,7 @@ exports.postLogin = async (req, res, next) => {
       });
     }
 
+    // ✅ store only small, serializable, safe user object in session
     req.session.isLoggedIn = true;
     req.session.user = {
       _id: user._id.toString(),
@@ -63,7 +65,7 @@ exports.postLogin = async (req, res, next) => {
   }
 };
 
-exports.postLogout = (req, res, next) => {
+exports.postLogout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout failed:", err);
@@ -148,9 +150,8 @@ exports.postSignup = [
     return true;
   }),
 
-  (req, res, next) => {
+  (req, res) => {
     const { firstName, lastName, email, password, userType } = req.body;
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -189,5 +190,5 @@ exports.getMe = (req, res) => {
       user: req.session.user,
     });
   }
-  res.json({ isLoggedIn: false });
+  return res.json({ isLoggedIn: false });
 };

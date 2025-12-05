@@ -6,14 +6,19 @@ const User = require("../Models/user");
 
 //Done
 exports.getIndex = async (req, res, next) => {
-  const homes = await Home.find();
-  if (!homes) {
-    return res.status(404).json({ message: "No homes found" });
+  try {
+    const homes = await Home.find();
+    if (!homes) {
+      return res.status(404).json({ message: "No homes found" });
+    }
+    res.status(200).json(homes);
+  } catch (err) {
+    console.error("Error fetching homes:", err);
+    res.status(500).json({ message: "Something went wrong" });
   }
-  res.status(200).json(homes);
 };
 
-exports.getHomes = (req, res, next) => {
+exports.getHomes = (req, res) => {
   Home.find().then((homes) => {
     res.render("store/home-list", {
       homes: homes,
@@ -23,50 +28,86 @@ exports.getHomes = (req, res, next) => {
   });
 };
 
-exports.getBookings = (req, res, next) => {
+exports.getBookings = (req, res) => {
   res.render("store/bookings", {
     isLoggedIn: req.isLoggedIn,
     user: req.session.user,
   });
 };
 
-exports.postAddToFavorites = async (req, res, next) => {
+// ✅ ADD TO FAVOURITES (API)
+exports.postAddToFavorites = async (req, res) => {
+  // guard: must be logged in
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   const homeId = req.body.homeId;
   const userId = req.session.user._id;
-  const user = await User.findById(userId);
-  if (!user.favouriteHomes.includes(homeId)) {
-    user.favouriteHomes.push(homeId);
-    const result = await user.save();
-    if (!result) {
-      return res
-        .status(500)
-        .json({ sucess: false, message: "Failed to add to favourites" });
-    }
-  }
-return res.status(200).json({ success: true });
 
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // avoid duplicates
+    const alreadyFav = user.favouriteHomes.some(
+      (id) => id.toString() === homeId
+    );
+
+    if (!alreadyFav) {
+      user.favouriteHomes.push(homeId);
+      await user.save();
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Error adding favourite:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to add to favourites" });
+  }
 };
 
-//Done
-exports.postDelFromFavorites = async (req, res, next) => {
+// ✅ REMOVE FROM FAVOURITES (API)
+exports.postDelFromFavorites = async (req, res) => {
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   const homeId = req.params.homeId;
   const userId = req.session.user._id;
 
-  const user = await User.findById(userId);
+  try {
+    const user = await User.findById(userId);
 
-  if (!user) {
-    return res.status(404).json({ status: flase, message: "User not found" });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    user.favouriteHomes = user.favouriteHomes.filter(
+      (hId) => hId.toString() !== homeId
+    );
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Home removed from favourites",
+    });
+  } catch (err) {
+    console.error("Error removing favourite:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to remove favourite" });
   }
-  user.favouriteHomes = user.favouriteHomes.filter(
-    (hId) => hId.toString() !== homeId
-  );
-  await user.save();
-  return res
-    .status(200)
-    .json({ status: true, message: "Home removed from favourites" });
 };
 
-//Done
+// ✅ GET FAVOURITES LIST (API)
 exports.getFavorites = async (req, res) => {
   if (!req.session || !req.session.user) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -74,16 +115,21 @@ exports.getFavorites = async (req, res) => {
 
   const userId = req.session.user._id;
 
-  const user = await User.findById(userId).populate("favouriteHomes");
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
+  try {
+    const user = await User.findById(userId).populate("favouriteHomes");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-  return res.status(200).json(user.favouriteHomes);
+    return res.status(200).json(user.favouriteHomes);
+  } catch (err) {
+    console.error("Error fetching favourites:", err);
+    return res.status(500).json({ message: "Failed to fetch favourites" });
+  }
 };
 
 //Done
-exports.getHomeDetails = async (req, res, next) => {
+exports.getHomeDetails = async (req, res) => {
   try {
     const homeId = req.params.homeId;
 
