@@ -36,12 +36,8 @@ exports.postLogin = async (req, res, next) => {
     }
 
     req.session.isLoggedIn = true;
-    req.session.user = {
-      _id: user._id && user._id.toString ? user._id.toString() : user._id,
-      firstName: user.firstName,
-      email: user.email,
-      userType: user.userType,
-    };
+    req.session.user = user;  // <-- store whole object
+
 
     req.session.save((err) => {
       if (err) {

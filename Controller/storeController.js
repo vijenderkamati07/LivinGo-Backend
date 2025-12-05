@@ -13,7 +13,6 @@ exports.getIndex = async (req, res, next) => {
   res.status(200).json(homes);
 };
 
-
 exports.getHomes = (req, res, next) => {
   Home.find().then((homes) => {
     res.render("store/home-list", {
@@ -39,10 +38,13 @@ exports.postAddToFavorites = async (req, res, next) => {
     user.favouriteHomes.push(homeId);
     const result = await user.save();
     if (!result) {
-      return res.status(500).json({ sucess: false, message: "Failed to add to favourites" });
+      return res
+        .status(500)
+        .json({ sucess: false, message: "Failed to add to favourites" });
     }
   }
-  return res.status(200).json({sucess: true, message: "Home added to favourites" });
+return res.status(200).json({ success: true });
+
 };
 
 //Done
@@ -59,19 +61,27 @@ exports.postDelFromFavorites = async (req, res, next) => {
     (hId) => hId.toString() !== homeId
   );
   await user.save();
-  return res.status(200).json({ status: true, message: "Home removed from favourites" });
+  return res
+    .status(200)
+    .json({ status: true, message: "Home removed from favourites" });
 };
 
 //Done
-exports.getFavorites = async (req, res, next) => {
+exports.getFavorites = async (req, res) => {
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   const userId = req.session.user._id;
+
   const user = await User.findById(userId).populate("favouriteHomes");
   if (!user) {
-    return res.status(404).json({  message: "User not found" });
-  } else {
-    return res.status(200).json(user.favouriteHomes);
+    return res.status(404).json({ message: "User not found" });
   }
+
+  return res.status(200).json(user.favouriteHomes);
 };
+
 //Done
 exports.getHomeDetails = async (req, res, next) => {
   try {
