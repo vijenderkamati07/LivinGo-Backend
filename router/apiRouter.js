@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getIndex, getHomeDetails, getFavorites, postDelFromFavorites, postAddToFavorites} = require('../Controller/storeController');
+const { getIndex, getHomeDetails, getFavorites, postDelFromFavorites, postAddToFavorites, getListedHomes} = require('../Controller/storeController');
 
 const { postSignup, postLogin, postLogout, getMe} = require('../Controller/authController');
 
@@ -11,6 +11,7 @@ const apiRouter = express.Router();
 // User routers
 apiRouter.get("/homes", getIndex); // return all homes
 apiRouter.get("/homes/:homeId", getHomeDetails); // return home details by ID
+apiRouter.get("/listed-homes", getListedHomes)//Return serached, filterd and sort homes
 
 //User Favourites routers
 apiRouter.get("/favourites", getFavorites); // return favourite homes

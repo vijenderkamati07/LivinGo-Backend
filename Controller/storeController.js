@@ -18,9 +18,9 @@ exports.getIndex = async (req, res, next) => {
   }
 };
 
-// ✅ ADD TO FAVOURITES (API)
+//Done
 exports.postAddToFavorites = async (req, res) => {
-  // guard: must be logged in
+  
   if (!req.session || !req.session.user) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
@@ -36,7 +36,7 @@ exports.postAddToFavorites = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // avoid duplicates
+    
     const alreadyFav = user.favouriteHomes.some(
       (id) => id.toString() === homeId
     );
@@ -55,7 +55,7 @@ exports.postAddToFavorites = async (req, res) => {
   }
 };
 
-// ✅ REMOVE FROM FAVOURITES (API)
+//Done
 exports.postDelFromFavorites = async (req, res) => {
   if (!req.session || !req.session.user) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -90,9 +90,9 @@ exports.postDelFromFavorites = async (req, res) => {
   }
 };
 
-// ✅ GET FAVOURITES LIST (API)
+//Done
 exports.getFavorites = async (req, res) => {
-  if (!req.session || !req.session.user) {
+  if (!req.session.isLoggedIn) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -100,11 +100,12 @@ exports.getFavorites = async (req, res) => {
 
   try {
     const user = await User.findById(userId).populate("favouriteHomes");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.status(200).json(user.favouriteHomes);
+    return res.status(200).json(user.favouriteHomes || []);
   } catch (err) {
     console.error("Error fetching favourites:", err);
     return res.status(500).json({ message: "Failed to fetch favourites" });
@@ -170,5 +171,79 @@ exports.getHomeDetails = async (req, res) => {
   } catch (error) {
     console.error("Error fetching home details:", error);
     res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//Done
+exports.getListedHomes = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      sort = "recent",
+      state,
+      category,
+      minPrice,
+      maxPrice,
+    } = req.query;
+
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 10;
+
+    const filter = {};
+
+    if (search && search.trim()) {
+  const regex = new RegExp(search.trim(), "i");
+  filter.$or = [
+    { title: regex },
+    { location: regex },
+    { city: regex },
+    { state: regex },
+    { category: regex },
+  ];
+}
+
+    if (state && state !== "all") {
+      filter.state = state;
+    }
+
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    const priceFilter = {};
+    if (minPrice) {
+      priceFilter.$gte = Number(minPrice);
+    }
+    if (maxPrice) {
+      priceFilter.$lte = Number(maxPrice);
+    }
+    if (Object.keys(priceFilter).length > 0) {
+      filter.price = priceFilter;
+    }
+    
+    let sortStage = { createdAt: -1 };
+    if (sort === "price_asc") sortStage = { price: 1 };
+    if (sort === "price_desc") sortStage = { price: -1 };
+    if (sort === "recent") sortStage = { createdAt: -1 };
+
+    const skip = (page - 1) * limit;
+
+    const docs = await Home.find(filter)
+      .sort(sortStage)
+      .skip(skip)
+      .limit(limit + 1);
+
+    const hasMore = docs.length > limit;
+    const homes = hasMore ? docs.slice(0, limit) : docs;
+
+    return res.json({
+      homes,
+      hasMore,
+    });
+  } catch (err) {
+    console.error("Error in getListedHomes:", err);
+    res.status(500).json({ message: "Failed to fetch homes" });
   }
 };
