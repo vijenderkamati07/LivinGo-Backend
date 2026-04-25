@@ -4,120 +4,105 @@ const path = require("path");
 const Home = require("../Models/home");
 const User = require("../Models/user");
 
-//Done
-exports.getIndex = async (req, res, next) => {
+exports.getIndex = async (req, res) => {
   try {
     const homes = await Home.find();
-    if (!homes) {
+
+    if (!homes || homes.length === 0) {
       return res.status(404).json({ message: "No homes found" });
     }
-    res.status(200).json(homes);
+
+    return res.status(200).json(homes);
+
   } catch (err) {
     console.error("Error fetching homes:", err);
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
-//Done
 exports.postAddToFavorites = async (req, res) => {
-  
-  if (!req.session || !req.session.user) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-
-  const homeId = req.body.homeId;
-  const userId = req.session.user._id;
-
   try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+    const userId = req.user.userId;
+    const { homeId } = req.body;
+
+    if (!homeId) {
+      return res.status(400).json({ message: "Home ID required" });
     }
 
-    
-    const alreadyFav = user.favouriteHomes.some(
-      (id) => id.toString() === homeId
-    );
-
-    if (!alreadyFav) {
-      user.favouriteHomes.push(homeId);
-      await user.save();
-    }
-
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    console.error("Error adding favourite:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to add to favourites" });
-  }
-};
-
-//Done
-exports.postDelFromFavorites = async (req, res) => {
-  if (!req.session || !req.session.user) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-
-  const homeId = req.params.homeId;
-  const userId = req.session.user._id;
-
-  try {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    user.favouriteHomes = user.favouriteHomes.filter(
-      (hId) => hId.toString() !== homeId
-    );
+    // prevent duplicates
+    if (user.favouriteHomes.includes(homeId)) {
+      return res.status(200).json({ message: "Already in favourites" });
+    }
+
+    user.favouriteHomes.push(homeId);
     await user.save();
 
     return res.status(200).json({
       success: true,
-      message: "Home removed from favourites",
+      message: "Added to favourites",
     });
   } catch (err) {
-    console.error("Error removing favourite:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to remove favourite" });
+    console.error("Add to favourites error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-//Done
-exports.getFavorites = async (req, res) => {
-  if (!req.session.isLoggedIn) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const userId = req.session.user._id;
-
+exports.postDelFromFavorites = async (req, res) => {
   try {
+    const userId = req.user.userId;
+    const { homeId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.favouriteHomes = user.favouriteHomes.filter(
+      (id) => id.toString() !== homeId
+    );
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Removed from favourites",
+    });
+  } catch (err) {
+    console.error("Remove favourite error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getFavorites = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
     const user = await User.findById(userId).populate("favouriteHomes");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.status(200).json(user.favouriteHomes || []);
+    return res.status(200).json(user.favouriteHomes);
   } catch (err) {
-    console.error("Error fetching favourites:", err);
-    return res.status(500).json({ message: "Failed to fetch favourites" });
+    console.error("Get favourites error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-//Done
 exports.getHomeDetails = async (req, res) => {
   try {
     const homeId = req.params.homeId;
 
     const home = await Home.findById(homeId);
+
     if (!home) {
       return res.status(404).json({ message: "Home not found" });
     }
@@ -147,34 +132,28 @@ exports.getHomeDetails = async (req, res) => {
       ],
 
       reviews: [
-        { name: "Ujjwal", review: "Amazing stay! Clean rooms and fast Wi-Fi." },
-        {
-          name: "Ashwani",
-          review: "Loved the cozy interior. Will return soon!",
-        },
-        {
-          name: "Rupan",
-          review: "Perfect for families — peaceful and spacious.",
-        },
-        { name: "Rohit", review: "Quick check-in process and polite host." },
+        { name: "Ujjwal", review: "Amazing stay!" },
+        { name: "Ashwani", review: "Loved it!" },
+        { name: "Rupan", review: "Perfect stay" },
+        { name: "Rohit", review: "Smooth experience" },
       ],
 
       host: {
         name: "Manish Singh",
-        bio: "Hosting since 2022 • English & Hindi",
+        bio: "Hosting since 2022",
         responseRate: 98,
         isSuperhost: true,
       },
     };
 
     return res.status(200).json(response);
+
   } catch (error) {
     console.error("Error fetching home details:", error);
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
-//Done
 exports.getListedHomes = async (req, res) => {
   try {
     let {
@@ -188,21 +167,20 @@ exports.getListedHomes = async (req, res) => {
       maxPrice,
     } = req.query;
 
-    page = parseInt(page, 10) || 1;
-    limit = parseInt(limit, 10) || 10;
+    page = parseInt(page);
+    limit = parseInt(limit);
 
     const filter = {};
 
-    if (search && search.trim()) {
-  const regex = new RegExp(search.trim(), "i");
-  filter.$or = [
-    { title: regex },
-    { location: regex },
-    { city: regex },
-    { state: regex },
-    { category: regex },
-  ];
-}
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { houseName: regex },
+        { location: regex },
+        { state: regex },
+        { category: regex },
+      ];
+    }
 
     if (state && state !== "all") {
       filter.state = state;
@@ -213,20 +191,15 @@ exports.getListedHomes = async (req, res) => {
     }
 
     const priceFilter = {};
-    if (minPrice) {
-      priceFilter.$gte = Number(minPrice);
-    }
-    if (maxPrice) {
-      priceFilter.$lte = Number(maxPrice);
-    }
-    if (Object.keys(priceFilter).length > 0) {
+    if (minPrice) priceFilter.$gte = Number(minPrice);
+    if (maxPrice) priceFilter.$lte = Number(maxPrice);
+    if (Object.keys(priceFilter).length) {
       filter.price = priceFilter;
     }
-    
+
     let sortStage = { createdAt: -1 };
     if (sort === "price_asc") sortStage = { price: 1 };
     if (sort === "price_desc") sortStage = { price: -1 };
-    if (sort === "recent") sortStage = { createdAt: -1 };
 
     const skip = (page - 1) * limit;
 
@@ -238,12 +211,10 @@ exports.getListedHomes = async (req, res) => {
     const hasMore = docs.length > limit;
     const homes = hasMore ? docs.slice(0, limit) : docs;
 
-    return res.json({
-      homes,
-      hasMore,
-    });
+    return res.json({ homes, hasMore });
+
   } catch (err) {
     console.error("Error in getListedHomes:", err);
-    res.status(500).json({ message: "Failed to fetch homes" });
+    return res.status(500).json({ message: "Failed to fetch homes" });
   }
 };

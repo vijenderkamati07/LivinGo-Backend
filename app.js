@@ -4,9 +4,8 @@ const path = require("path");
 //External Module
 const express = require("express");
 const mongoose = require("mongoose");
-const session = require("express-session");
 const dotenev = require("dotenv").config();
-const mongoDbStore = require("connect-mongodb-session")(session);
+const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const cors = require("cors");
 
@@ -16,16 +15,6 @@ const { error } = require("./Controller/error");
 const apiRouter = require("./router/apiRouter");
 
 const app = express();
-
-const store = new mongoDbStore({
-  uri: process.env.MONGO_URI,
-  collection: "sessions",
-});
-
-// (optional but useful) log store errors
-store.on("error", (err) => {
-  console.error("Session store error:", err);
-});
 
 const randomStr = (length) => {
   let result = "";
@@ -63,13 +52,14 @@ const multerOptions = multer({
   fileFilter: fileFilter,
 });
 
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // CORS for frontend origins
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://livingo-six.vercel.app"],
+    origin: ["http://localhost:3000", "https://livingo-six.vercel.app"],
     credentials: true,
   })
 );
@@ -82,36 +72,7 @@ app.use(express.static(path.join(mainDir, "public")));
 app.use("/uploads", express.static(path.join(mainDir, "uploads")));
 app.use("/host/uploads", express.static(path.join(mainDir, "uploads")));
 
-app.use(
-  session({
-    secret: "...",
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-    cookie: {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite:
-    process.env.NODE_ENV === "production" ? "none" : "lax",
-  maxAge: 1000 * 60 * 60 * 24 * 7,
-}
-  })
-);
-
-app.use((req, res, next) => {
-  req.isLoggedIn = req.session.isLoggedIn;
-  next();
-});
-
 app.use("/api", apiRouter);
-
-app.use("/host", (req, res, next) => {
-  if (req.isLoggedIn) {
-    next();
-  } else {
-    res.redirect("/login");
-  }
-});
 
 app.use(error);
 

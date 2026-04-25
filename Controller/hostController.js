@@ -6,87 +6,116 @@ const fs = require("fs");
 const mainDir = require("../utils/pathUtil");
 const Home = require("../Models/home");
 
-
-exports.getEditHomes = async (req, res, next) => {
+exports.getEditHomes = async (req, res) => {
   const homeId = req.params.homeId;
-  // const editing = req.query.editing === "true";
 
-  await Home.findById(homeId)
-    .then((home) => {
-      if (!home) {
-        console.log("home not found for editing");
-        return res.status(400).json({ message: "Home not found" });
-      }
-      console.log(home);
-      res.status(200).json(home);
-    })
-    .catch((err) => {
-      console.log("Error fetching home for edit", err);
-      res.status(500).json({ message: "Error fetching home" });
-    });
+  try {
+    // 🔐 Role check (defensive)
+    if (req.user.userType !== "host") {
+      return res.status(403).json({ message: "Only hosts allowed" });
+    }
+
+    const home = await Home.findById(homeId);
+
+    if (!home) {
+      return res.status(404).json({ message: "Home not found" });
+    }
+
+    if (home.userId.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "Unauthorized action" });
+    }
+
+    return res.status(200).json(home);
+
+  } catch (err) {
+    console.error("Error fetching home:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
-exports.postAddHome = async (req, res, next) => {
-  const { houseName, price, location, state, description, category } = req.body;
-  const userId = req.session.user._id;
+exports.postAddHome = async (req, res) => {
+  try {
+    //Role check
+    if (req.user.userType !== "host") {
+      return res.status(403).json({ message: "Only hosts can add homes" });
+    }
 
-  // console.log("User session data:", req.file);
+    const { houseName, price, location, state, description, category } = req.body;
 
-  if (!req.file) {
-    return res.status(422).json({
-      editing: false,
-      isLoggedIn: req.isLoggedIn,
-      user: req.session.user,
-      errors:
-        "Attached file is not an image. Please upload a valid image file.",
-      oldInput: { houseName, price, location, state, description, category },
+    if (!houseName || !price || !location || !state) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    if (!req.file) {
+      return res.status(422).json({ message: "Image is required" });
+    }
+
+    const home = new Home({
+      houseName,
+      price,
+      location,
+      state,
+      description,
+      category,
+      photo: req.file.filename,
+      userId: req.user.userId,
     });
+
+    const result = await home.save();
+
+    console.log("Home Created:", result);
+
+    return res.status(201).json({
+      success: true,
+      message: "Home added successfully",
+    });
+
+  } catch (err) {
+    console.error("Add home error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
-
-  const photo = req.file.filename;
-
-  const house = new Home({
-    houseName,
-    price,
-    location,
-    state,
-    photo,
-    description,
-    category,
-    userId,
-  });
-  await house
-    .save()
-    .then((result) => {
-      console.log("New Home Created: ", result);
-      res.status(201).json({ message: "Home added successfully!" });
-    })
-    .catch((err) => {
-      console.log("Error while creating new home", err);
-    });
 };
 
 exports.getHostHomes = async (req, res) => {
   try {
-    const hostId = req.session.user._id;
-    const homes = await Home.find({ userId: hostId });
-    res.status(200).json(homes);
+    // Role check
+    if (req.user.userType !== "host") {
+      return res.status(403).json({ message: "Only hosts allowed" });
+    }
+
+    const homes = await Home.find({ userId: req.user.userId });
+
+    return res.status(200).json(homes);
+
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err });
+    console.error("Fetch host homes error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
-exports.postEditHomes = async (req, res, next) => {
-  const { houseName, price, location, state, description, category } = req.body;
+exports.postEditHomes = async (req, res) => {
   const homeId = req.params.homeId;
 
   try {
+    // Role check
+    if (req.user.userType !== "host") {
+      return res.status(403).json({ message: "Only hosts allowed" });
+    }
+
     const home = await Home.findById(homeId);
+
     if (!home) {
-      console.log("Home not found");
       return res.status(404).json({ message: "Home not found" });
     }
 
+    //Ownership check
+    if (home.userId.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "Unauthorized action" });
+    }
+
+    const { houseName, price, location, state, description, category } = req.body;
+
+    // ✅ Update fields
     home.houseName = houseName;
     home.price = price;
     home.location = location;
@@ -94,46 +123,72 @@ exports.postEditHomes = async (req, res, next) => {
     home.description = description;
     home.category = category;
 
+    // 🖼 Handle image update
     if (req.file) {
       if (home.photo) {
-        const oldImagePath = path.join(mainDir, "uploads", home.photo);
-        fs.unlink(oldImagePath, (err) => {
-          if (err) {
-            console.error("Error deleting old image:", err);
-          } else {
-            console.log("Old image deleted successfully");
-          }
+        const oldPath = path.join(mainDir, "uploads", home.photo);
+
+        fs.unlink(oldPath, (err) => {
+          if (err) console.error("Error deleting old image:", err);
         });
       }
+
       home.photo = req.file.filename;
     }
 
     const result = await home.save();
-    console.log("Home Updated: ", result);
-    res.status(200).json({ message: "Home updated successfully!" });
+
+    console.log("Home Updated:", result);
+
+    return res.status(200).json({
+      success: true,
+      message: "Home updated successfully",
+    });
+
   } catch (err) {
-    console.log("Error while updating", err);
-    res.status(500).json({ message: "Error updating home" });
+    console.error("Edit home error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
 exports.postDeletetHome = async (req, res) => {
+  const homeId = req.params.homeId;
+
   try {
-    const homeId = req.params.homeId;
-    const userId = req.session.user._id;
+    // 🔐 Role check
+    if (req.user.userType !== "host") {
+      return res.status(403).json({ message: "Only hosts allowed" });
+    }
 
     const home = await Home.findById(homeId);
-    if (!home) return res.status(404).json({ message: "Home not found" });
 
-    if (home.userId.toString() !== userId.toString()) {
+    if (!home) {
+      return res.status(404).json({ message: "Home not found" });
+    }
+
+    // Ownership check
+    if (home.userId.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
+    // Delete image
+    if (home.photo) {
+      const imagePath = path.join(mainDir, "uploads", home.photo);
+
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error("Error deleting image:", err);
+      });
+    }
+
     await Home.findByIdAndDelete(homeId);
-    res.status(200).json({ success: true, message: "Home deleted successfully" });
+
+    return res.status(200).json({
+      success: true,
+      message: "Home deleted successfully",
+    });
+
   } catch (err) {
-    console.error("Error deleting home", err);
-    res.status(500).json({ message: "Error deleting home" });
+    console.error("Delete home error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
-

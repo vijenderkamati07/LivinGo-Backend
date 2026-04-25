@@ -2,6 +2,7 @@
 const { check } = require("express-validator");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 //Local modules
 const User = require("../Models/user");
@@ -27,29 +28,34 @@ exports.postLogin = async (req, res, next) => {
       });
     }
 
-    // ✅ store only small, serializable, safe user object in session
-    req.session.isLoggedIn = true;
-    req.session.user = {
-      _id: user._id.toString(),
-      firstName: user.firstName,
+    const token = jwt.sign(
+      {
+      userId: user._id,
       email: user.email,
       userType: user.userType,
-    };
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+      );
 
-    req.session.save((err) => {
-      if (err) {
-        console.error("Session save failed:", err);
-        return next(err);
-      }
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
-      console.log("Session saved successfully for:", req.session.user.email);
       return res.json({
         success: true,
         message: "Login successful",
-        isLoggedIn: true,
-        user: req.session.user,
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          email: user.email,
+          userType: user.userType,
+        },
       });
-    });
+    
   } catch (err) {
     console.error("Error in login flow:", err);
     return next(err);
@@ -57,18 +63,10 @@ exports.postLogin = async (req, res, next) => {
 };
 
 exports.postLogout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Logout failed:", err);
-      return res.status(500).json({ success: false, message: "Logout failed" });
-    }
-
-    // Clear cookie on client
-    res.clearCookie("connect.sid");
-    return res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
+  res.clearCookie("token");
+  return res.json({
+    success: true,
+    message: "Logged out successfully",
   });
 };
 
@@ -159,12 +157,27 @@ exports.postSignup = [
   },
 ];
 
-exports.getMe = (req, res) => {
-  if (req.session?.isLoggedIn) {
+exports.getMe = async (req, res) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.json({ isLoggedIn: false });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.json({ isLoggedIn: false });
+    }
+
     return res.json({
       isLoggedIn: true,
-      user: req.session.user,
+      user,
     });
+  } catch {
+    return res.json({ isLoggedIn: false });
   }
-  return res.json({ isLoggedIn: false });
 };
