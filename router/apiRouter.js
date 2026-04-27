@@ -3,11 +3,34 @@ const express = require('express');
 //Local Modules
 const {isAuth} = require("../Middleware/authMidle");
 const isHost = require("../Middleware/isHost");
-const { getIndex, getHomeDetails, getFavorites, postDelFromFavorites, postAddToFavorites, getListedHomes} = require('../Controller/storeController');
-const { postSignup, postLogin, postLogout, getMe} = require('../Controller/authController');
-const {getHostHomes, postAddHome, postEditHomes, getHomeForEdit, getEditHomes, postDeletetHome}= require('../Controller/hostController');
+const { getIndex, 
+        getHomeDetails, 
+        getFavorites, 
+        postDelFromFavorites, 
+        postAddToFavorites, 
+        getListedHomes
+      } = require('../Controller/storeController');
+const { postSignup,
+       postLogin, 
+       postLogout, 
+       getMe
+      } = require('../Controller/authController');
+const { getHostHomes, 
+        postAddHome, 
+        postEditHomes,
+        getHomeForEdit, 
+        getEditHomes, 
+        postDeletetHome, 
+        getDashboardData, 
+        getRecentBookings ,
+        getPropertyStats
+      }= require('../Controller/hostController');
 
-const { createBooking, cancelBooking, getMyBookings, getHostBookings } = require('../Controller/bookingController');
+const { createBooking,
+        cancelBooking, 
+        getMyBookings, 
+        getHostBookings 
+      } = require('../Controller/bookingController');
 
 const apiRouter = express.Router();
 
@@ -36,6 +59,11 @@ apiRouter.get("/host/edit-home/:homeId",isAuth, isHost, getEditHomes); // get ho
 apiRouter.post("/host/edit-home/:homeId", isAuth, isHost, postEditHomes); // edit existing home
 apiRouter.post("/host/delete-home/:homeId",isAuth, isHost, postDeletetHome); // delete existing home
 apiRouter.get("/host/host-bookings", isAuth, isHost, getHostBookings);
+
+//Host Dashboard
+apiRouter.get("/host/dashboard", isAuth, isHost, getDashboardData);
+apiRouter.get("/host/recent-bookings", isAuth, isHost, getRecentBookings);
+apiRouter.get("/host/property-stats", isAuth, isHost, getPropertyStats);
 
 
 //Booking routers

@@ -5,13 +5,14 @@ const {createBookingService, cancelBookingService, getUserBookingsService, getHo
 exports.createBooking = async (req, res, next)=>{
 
   try{
-    const {homeId, startDate, endDate } = req.body;
+    const { homeId, startDate, endDate, person } = req.body;
 
     const booking = await createBookingService(
       req.user.userId,
       homeId,
       startDate,
-      endDate
+      endDate,
+      person
     );
 
     res.status(201).json(
@@ -61,16 +62,12 @@ exports.getMyBookings = async (req, res, next) => {
 };
 
 exports.getHostBookings = async (req, res, next) => {
-
-
   const bookings = await getHostBookingsService(req.user.userId);
-
   if(!bookings){
     res.status(404).json(
       {message: "You did not have any Bookings right now"}
     )
   }
-
   res.status(200).json({
     success: true,
     data:bookings

@@ -5,12 +5,13 @@ const fs = require("fs");
 //Local Module
 const mainDir = require("../utils/pathUtil");
 const Home = require("../Models/home");
+const Booking = require("../Models/bookings");
 
 exports.getEditHomes = async (req, res) => {
   const homeId = req.params.homeId;
 
   try {
-    // 🔐 Role check (defensive)
+    // Role check (defensive)
     if (req.user.userType !== "host") {
       return res.status(403).json({ message: "Only hosts allowed" });
     }
@@ -190,5 +191,102 @@ exports.postDeletetHome = async (req, res) => {
   } catch (err) {
     console.error("Delete home error:", err);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//Dashboard Controllers
+exports.getDashboardData = async (req, res) => {
+  try {
+    const hostId = req.user.userId;
+
+    const bookings = await Booking.find({ hostId });
+
+    const confirmedBookings = bookings.filter(
+      (b) => b.status === "confirmed"
+    );
+
+    const revenue = confirmedBookings.reduce(
+      (sum, b) => sum + b.totalPrice,
+      0
+    );
+
+    const totalHomes = await Home.countDocuments({
+      userId: hostId
+    });
+
+    res.status(200).json({
+      totalBookings: bookings.length,
+      confirmedBookings: confirmedBookings.length,
+      revenue,
+      totalHomes
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to load dashboard data"
+    });
+  }
+};
+
+exports.getRecentBookings = async (req, res) => {
+
+  try{
+    const hostId = req.user.userId;
+    const bookings = await Booking.find({ hostId })
+      .populate("userId", "firstName email")
+      .populate("homeId", "houseName")
+      .sort({ createdAt: -1 })
+      .limit(5);
+    
+    const formatted = bookings.map((b) => ({
+      bookingId: b._id,
+      guestName: b.userId?.firstName,
+      email: b.userId?.email,
+      homeName: b.homeId?.houseName,
+      startDate: b.startDate,
+      endDate: b.endDate,
+      totalPrice: b.totalPrice,
+      status: b.status
+    }));
+
+    res.status(200).json(formatted);
+
+  }catch(err){
+    res.status(500).json({
+      message: "Failed to fetch Recent Bookings"
+    });
+  };
+};
+
+exports.getPropertyStats = async (req, res) => {
+  try {
+    const hostId = req.user.userId;
+
+    const bookings = await Booking.find({ hostId });
+
+    const map = {};
+
+    bookings.forEach((b) => {
+      const key = b.homeId.toString();
+
+      if (!map[key]) {
+        map[key] = {
+          homeId: key,
+          totalBookings: 0,
+          totalRevenue: 0
+        };
+      }
+
+      map[key].totalBookings += 1;
+      map[key].totalRevenue += b.totalPrice;
+    });
+
+    const result = Object.values(map);//Convert to array
+    res.status(200).json(result);
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to fetch Property stats"
+    });
   }
 };

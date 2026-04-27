@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Home = require('../Models/home');
 const Booking = require('../Models/bookings');
 
-exports.createBookingService = async(userId, homeId, startDate, endDate) => {
+exports.createBookingService = async(userId, homeId, startDate, endDate, person) => {
 
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -63,6 +63,7 @@ exports.createBookingService = async(userId, homeId, startDate, endDate) => {
       startDate: start,
       endDate: end,
       totalPrice,
+      person,
       status: "confirmed"
     }], { session });
 
