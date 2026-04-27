@@ -1,15 +1,13 @@
 const express = require('express');
 
 //Local Modules
-
 const {isAuth} = require("../Middleware/authMidle");
 const isHost = require("../Middleware/isHost");
-
 const { getIndex, getHomeDetails, getFavorites, postDelFromFavorites, postAddToFavorites, getListedHomes} = require('../Controller/storeController');
-
 const { postSignup, postLogin, postLogout, getMe} = require('../Controller/authController');
-
 const {getHostHomes, postAddHome, postEditHomes, getHomeForEdit, getEditHomes, postDeletetHome}= require('../Controller/hostController');
+
+const { createBooking, cancelBooking, getMyBookings, getHostBookings } = require('../Controller/bookingController');
 
 const apiRouter = express.Router();
 
@@ -37,7 +35,13 @@ apiRouter.post("/host/add-home", isAuth, isHost, postAddHome); // add new home
 apiRouter.get("/host/edit-home/:homeId",isAuth, isHost, getEditHomes); // get home details for editing
 apiRouter.post("/host/edit-home/:homeId", isAuth, isHost, postEditHomes); // edit existing home
 apiRouter.post("/host/delete-home/:homeId",isAuth, isHost, postDeletetHome); // delete existing home
+apiRouter.get("/host/host-bookings", isAuth, isHost, getHostBookings);
 
+
+//Booking routers
+apiRouter.get("/my-bookings", isAuth, getMyBookings);
+apiRouter.post("/create-booking", isAuth, createBooking);
+apiRouter.patch("/bookings/:bookingId/cancel", isAuth, cancelBooking);
 
 
 module.exports = apiRouter;
