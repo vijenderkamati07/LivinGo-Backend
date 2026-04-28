@@ -290,3 +290,46 @@ exports.getPropertyStats = async (req, res) => {
     });
   }
 };
+
+
+//Host profile 
+exports.getHostProfile = async (req, res) => {
+
+  try{
+
+    const userId = req.user.userId;
+
+    //Recent listing
+    const listing = await Home.find({userId: userId}).sort({created: -1}).limit(1);
+
+    if(!listing){
+      res.status(400).json({
+        message: "You didn't have any listing"
+      });
+    }
+
+    //Find 5 Recent bookings
+    const bookings = await Booking.find({ hostId: userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+      if(!bookings){
+        throw new Error("No didn't any bookings right now");
+      }
+
+      const review = {
+        "guestName": "Rahul",
+        "rating": 5,
+        "comment": "Amazing stay!"
+      }
+
+      res.status(200).json({
+        listings: listing,
+        recentBookings: bookings,
+        recentReviews: review
+      });
+    
+  }catch(err){
+    throw new Error("Error while fetching host profile")
+  }
+};

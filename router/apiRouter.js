@@ -8,7 +8,8 @@ const { getIndex,
         getFavorites, 
         postDelFromFavorites, 
         postAddToFavorites, 
-        getListedHomes
+        getListedHomes,
+        getProfile
       } = require('../Controller/storeController');
 const { postSignup,
        postLogin, 
@@ -23,7 +24,8 @@ const { getHostHomes,
         postDeletetHome, 
         getDashboardData, 
         getRecentBookings ,
-        getPropertyStats
+        getPropertyStats,
+        getHostProfile
       }= require('../Controller/hostController');
 
 const { createBooking,
@@ -38,6 +40,7 @@ const apiRouter = express.Router();
 apiRouter.get("/homes", getIndex); // return all homes
 apiRouter.get("/homes/:homeId", getHomeDetails); // return home details by ID
 apiRouter.get("/listed-homes", getListedHomes)//Return serached, filterd and sort homes
+apiRouter.get("/profile", isAuth, getProfile);//For normal user profile
 
 //User Favourites routers
 apiRouter.get("/favourites", isAuth, getFavorites); // return favourite homes
@@ -59,11 +62,12 @@ apiRouter.get("/host/edit-home/:homeId",isAuth, isHost, getEditHomes); // get ho
 apiRouter.post("/host/edit-home/:homeId", isAuth, isHost, postEditHomes); // edit existing home
 apiRouter.post("/host/delete-home/:homeId",isAuth, isHost, postDeletetHome); // delete existing home
 apiRouter.get("/host/host-bookings", isAuth, isHost, getHostBookings);
+apiRouter.get("/host/profile-preview", isAuth, isHost, getHostProfile);
 
 //Host Dashboard
 apiRouter.get("/host/dashboard", isAuth, isHost, getDashboardData);
 apiRouter.get("/host/recent-bookings", isAuth, isHost, getRecentBookings);
-apiRouter.get("/host/property-stats", isAuth, isHost, getPropertyStats);
+apiRouter.get("/host/property-stats", isAuth, getPropertyStats);
 
 
 //Booking routers

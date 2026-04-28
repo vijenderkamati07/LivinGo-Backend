@@ -26,6 +26,6 @@ const userSchema = mongoose.Schema({
       ref: "Home",
     },
   ],
-});
+},{ timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

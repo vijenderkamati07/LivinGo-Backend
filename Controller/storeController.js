@@ -218,3 +218,39 @@ exports.getListedHomes = async (req, res) => {
     return res.status(500).json({ message: "Failed to fetch homes" });
   }
 };
+
+exports.getProfile = async (req, res) => {
+
+    try{
+      const userId = req.user.userId;
+      const userData = await User.findById(userId);
+
+      if(!userData){
+        res.status(400).json({
+          message: "User not found"
+        });
+      }
+      const fullName = userData.firstName+" "+userData.lastName;
+
+      const location = ["Delhi", "Goa","Jammu", "Chotpta", "Kolkata", "Shimla", "Dehradun" ];
+
+      let idx = Math.floor(Math.random() * location.length);
+      
+      res.status(200).json({
+        success: true,
+        data:{
+          userId,
+          fullName,
+          email: userData.email,
+          location: location[idx],
+          userType: userData.userType,
+          createdAt: userData.createdAt
+        }
+      });
+    }catch(err){
+      throw new Error("Error while fetching details");
+      res.status(500).json({
+        message: "Server Error"
+      })
+    }
+};
