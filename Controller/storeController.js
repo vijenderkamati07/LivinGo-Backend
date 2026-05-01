@@ -102,7 +102,7 @@ exports.getHomeDetails = async (req, res) => {
     const homeId = req.params.homeId;
 
     const home = await Home.findById(homeId)
-                .populate("hostId", "name email");
+                .populate("userId", "name email");
 
     if (!home) {
       return res.status(404).json({ message: "Home not found" });
@@ -140,7 +140,7 @@ exports.getHomeDetails = async (req, res) => {
       ],
 
       host: {
-        name: home.hostId.name,
+        name: home.userId.name,
         bio: "Hosting since 2022",
         responseRate: 98,
         isSuperhost: true,
