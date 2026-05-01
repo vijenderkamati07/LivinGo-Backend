@@ -74,7 +74,14 @@ app.use("/host/uploads", express.static(path.join(mainDir, "uploads")));
 
 app.use("/api", apiRouter);
 
-app.use(error);
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  res.status(400).json({
+    success: false,
+    message: err.message || "Something went wrong",
+  });
+});
 
 mongoose
   .connect(process.env.MONGO_URI)
